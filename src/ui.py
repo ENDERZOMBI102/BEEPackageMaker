@@ -1,3 +1,5 @@
+from typing import Union
+
 import wx
 from srctools.logger import get_logger
 
@@ -32,9 +34,10 @@ class Root(wx.Frame):
 		# create the menu bar
 		menuBar = wx.MenuBar()
 		# file menu
-		fileMenu = wx.Menu( title='file' )
-
-		fileMenu.Append(0, loc('root.menu.file.exit.name') )
+		fileMenu = wx.Menu()
+		openPortalDirItem = fileMenu.Append( 0, loc( 'root.menu.file.openportaldir.name' ) + '\tCtrl-P', loc( 'root.menu.file.openportaldir.description' ) )
+		openBeeDirItem = fileMenu.Append( 1, loc( 'root.menu.file.openbeedir.name' ) + "\tCtrl-B", loc( 'root.menu.file.openbeedir.description' ) )
+		exitItem = fileMenu.Append( 3, loc( 'root.menu.file.exit.name' ), loc( 'root.menu.file.exit.description' ) )
 		menuBar.Append( fileMenu, loc('root.menu.file.name') )
 
 		self.SetMenuBar( menuBar )
@@ -45,14 +48,14 @@ class Root(wx.Frame):
 		# file menu
 		self.Bind( wx.EVT_MENU, self.openp2dir, openPortalDirItem )
 		self.Bind( wx.EVT_MENU, self.openBEEdir, openBeeDirItem )
-		self.Bind( wx.EVT_MENU, self.exit, exitItem )
+		self.Bind( wx.EVT_MENU, self.OnClose, exitItem )
 
 		self.Bind( wx.EVT_CLOSE, self.OnClose, self )
 
 		self.Show()
 
 	# wx event callbacks
-	def OnClose( self, evt: wx.CloseEvent ):
+	def OnClose( self, evt: Union[wx.CloseEvent, wx.MenuEvent] ):
 		"""
 		called when the window/application is about to close
 		:param evt: placeholder
@@ -63,4 +66,11 @@ class Root(wx.Frame):
 		config.save( pos, 'mainWindowPos' )
 		config.save( None, 'placeholderForSaving' )
 		self.Destroy()
+
+	# menu items callbacks
+	def openp2dir( self, evt: wx.MenuEvent ):
+		pass
+
+	def openBEEdir( self, evt: wx.MenuEvent ):
+		pass
 
