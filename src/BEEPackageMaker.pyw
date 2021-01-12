@@ -1,7 +1,9 @@
 import json
 import logging
 import os
+import sys
 import traceback
+from pathlib import Path
 from sys import argv
 from types import TracebackType
 from typing import Type
@@ -10,6 +12,7 @@ import srctools.logger
 import wx
 
 import config
+import timeTest
 import utilities
 from ui import Root
 import localization
@@ -23,6 +26,7 @@ class App(wx.App):
 	root: Root
 	logger: logging.Logger
 	ShouldExit: bool = False
+	ShouldRestart: bool = False
 	instanceChecker = wx.SingleInstanceChecker('BPM')
 
 	def OnPreInit( self ):
@@ -90,6 +94,13 @@ class App(wx.App):
 		return True
 
 	def OnExit(self):
+		with open( config.configPath, 'w' ) as file:
+			json.dump( config.currentConfigData, file, indent=4 )
+		if config.dynConfig[ 'continueLoggingOnUncaughtException' ]:
+			import logging
+			logging.shutdown()
+		if self.ShouldRestart:
+			os.system( sys.executable )
 		return True
 
 	def OnError( self, etype: Type[BaseException], value: BaseException, tb: TracebackType ):
@@ -110,5 +121,20 @@ class App(wx.App):
 
 
 if __name__ == '__main__':
+	# use file dir as working dir
+	path: Path = None
+	if utilities.frozen():
+		path = Path( sys.executable ).resolve()
+		print( f"BPM exe path: {path.parent.resolve()}" )
+	else:
+		path = Path( __file__ ).resolve()
+		print( 'BPM is running in a developer environment.' )
+		print( f"BPM source path: {path.parent}" )
+	os.chdir( path.parent )
+	timeStartup = '--time' in argv
+	if timeStartup:
+		timeTest.start()
 	app = App()
+	if timeStartup:
+		timeTest.stop()
 	app.MainLoop()
