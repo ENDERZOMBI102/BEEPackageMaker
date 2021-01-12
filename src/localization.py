@@ -122,7 +122,7 @@ class Localize:
 		try:
 			# get lang file from github
 			data = requests.get(
-				f'https://github.com/ENDERZOMBI102/BEE-manipulator/raw/master/langs/{langToDownload}.jlang'
+				f'https://github.com/ENDERZOMBI102/BEEPackageMaker/raw/master/langs/{langToDownload}.jlang'
 			).json()
 			# create a Path object with the lang file path
 			langFile = Path(f'{config.load("l18nFolderPath")}/{langToDownload}.jlang')
