@@ -135,7 +135,7 @@ def save(data, section):  # save a config
 def check(cfg: dict = None) -> bool:
 
 	"""
-	check if the config file exist and if is a BM config file
+	check if the config file exist and if is a BPM config file
 	:param cfg: optional string to use instead of reopening from the file system
 	:return: True if is a valid config
 	"""
@@ -155,7 +155,7 @@ def check(cfg: dict = None) -> bool:
 		# the check is made successfully
 		return True
 	else:
-		# the config file is not a BM config file
+		# the config file is not a BPM config file
 		return False
 
 

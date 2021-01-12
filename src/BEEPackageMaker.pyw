@@ -45,6 +45,10 @@ class App(wx.App):
 		if '--dev' in argv:
 			config.overwrite( 'l18nFolderPath', './../langs' )
 			utilities.env = 'dev'
+		if '--flags' in argv:
+			flagIndex = argv.index( '--flags' ) + 1
+			if not argv[ flagIndex ].startswith( '--' ):
+				config.dynConfig.parseFlags( argv[ flagIndex ] )
 		# check configs
 		self.logger.info( 'Checking config file..' )
 		if config.check():
