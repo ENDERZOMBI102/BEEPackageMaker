@@ -1,5 +1,6 @@
 {
 	"currentLang": "English",
 	"root.menu.file.name": "File",
-	"root.menu.file.exit.name": "Exit"
+	"root.menu.file.exit.name": "Exit",
+	"root.statusbar.text": "Hey {username}! Lets create!"
 }
