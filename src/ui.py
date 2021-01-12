@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from typing import Union
 
 import wx
@@ -68,9 +70,23 @@ class Root(wx.Frame):
 		self.Destroy()
 
 	# menu items callbacks
-	def openp2dir( self, evt: wx.MenuEvent ):
-		pass
+	@staticmethod
+	def openp2dir( evt: wx.CommandEvent ):
+		"""
+		opens the Portal 2 directory with the default file explorer
+		:param evt: placeholder
+		"""
+		os.startfile( config.portalDir() )
 
-	def openBEEdir( self, evt: wx.MenuEvent ):
-		pass
+	@staticmethod
+	def openBEEdir( evt: wx.CommandEvent ):
+		"""
+		opens the BEE2.4 directory with the default file explorer
+		:param evt: placeholder
+		"""
+		os.startfile(
+			Path( config.load( 'beePath' ) ).parent
+			if config.load( 'beePath' ).lower().endswith( '.exe' )
+			else Path( config.load( 'beePath' ) )
+		)
 
