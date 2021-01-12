@@ -26,7 +26,7 @@ version: VersionInfo = VersionInfo(
 """current app version"""
 
 default_config = {
-	'config_type': 'BEE2.4 PAckage Maker Config File',
+	'config_type': 'BEE2.4 Package Maker Config File',
 	'usePrereleases': False if utilities.frozen() else True,
 	'steamDir': None,
 	'portal2Dir': None,
