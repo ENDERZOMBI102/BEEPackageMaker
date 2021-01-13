@@ -12,10 +12,13 @@ if __name__ == '__main__':
 	from localization import loc
 
 
-LOGGER = get_logger('Root Window')
+logger = get_logger('Root Window')
 
 
 class Root(wx.Frame):
+
+	itemSelector: wx.Choice
+	pnl: wx.Panel
 
 	def __init__(self):
 		# set the utilities.root pointer to the object of this class
@@ -31,7 +34,7 @@ class Root(wx.Frame):
 			self.CenterOnScreen()
 		self.SetSize( width=600, height=500 )
 		self.SetMinSize( wx.Size( width=600, height=500 ) )
-		LOGGER.info( f'internet connected: {utilities.isonline()}' )
+		logger.info( f'internet connected: {utilities.isonline()}' )
 
 		# create the menu bar
 		menuBar = wx.MenuBar()
@@ -46,12 +49,33 @@ class Root(wx.Frame):
 		self.CreateStatusBar()
 		self.SetStatusText( loc( 'root.statusbar.text' ).replace( '{username}', config.steamUsername() ) )
 
+		self.pnl = wx.Panel(self)
+
+		rightSizer = wx.BoxSizer(wx.VERTICAL)
+		leftSizer = wx.BoxSizer(wx.VERTICAL)
+
+		self.itemSelector = wx.Choice(
+			parent=self.pnl,
+			pos=wx.Point(3, 4)
+		)
+		self.itemSelector.Append( loc('root.itemlist.additem') )
+		rightSizer.Add( self.itemSelector )
+
+		sizer = wx.BoxSizer()
+		sizer.Add( leftSizer )
+		sizer.Add( rightSizer )
+		self.pnl.SetSizer( sizer )
+
 		# menu bar events
 		# file menu
 		self.Bind( wx.EVT_MENU, self.openp2dir, openPortalDirItem )
 		self.Bind( wx.EVT_MENU, self.openBEEdir, openBeeDirItem )
 		self.Bind( wx.EVT_MENU, self.OnClose, exitItem )
 
+		# normal events
+		self.Bind( wx.EVT_CHOICE, self.OnItemSelection, self.itemSelector )
+
+		# window events
 		self.Bind( wx.EVT_CLOSE, self.OnClose, self )
 
 		self.Show()
@@ -64,7 +88,7 @@ class Root(wx.Frame):
 		"""
 		# get the window position and save it
 		pos = list( self.GetPosition().Get() )
-		LOGGER.debug( f'saved main window position: {pos}' )
+		logger.debug( f'saved main window position: {pos}' )
 		config.save( pos, 'mainWindowPos' )
 		config.save( None, 'placeholderForSaving' )
 		self.Destroy()
@@ -89,4 +113,18 @@ class Root(wx.Frame):
 			if config.load( 'beePath' ).lower().endswith( '.exe' )
 			else Path( config.load( 'beePath' ) )
 		)
+
+	def OnItemSelection( self, evt: wx.CommandEvent ):
+		if evt.GetString() == loc('root.itemlist.additem'):
+			diag = wx.TextEntryDialog(
+				parent=self,
+				caption=loc('root.dialog.newitem.title'),
+				message=loc('root.dialog.newitem.message')
+			)
+			diag.ShowModal()
+			self.itemSelector.Insert( diag.GetValue(), 0 )
+			self.itemSelector.Select(0)
+
+
+
 

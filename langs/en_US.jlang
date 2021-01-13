@@ -7,5 +7,8 @@
 	"root.menu.file.openportaldir.description": "Opens the Portal 2 Folder in explorer",
 	"root.menu.file.openbeedir.name": "Open BEEmod Folder",
 	"root.menu.file.openbeedir.description": "Opens the BEEmod Folder in explorer",
-	"root.statusbar.text": "Hey {username}! Lets create!"
+	"root.statusbar.text": "Hey {username}! Lets create!",
+	"root.itemlist.additem": "Add Item",
+	"root.dialog.newitem.title": "Add Item",
+	"root.dialog.newitem.message": "Insert the name of the new item"
 }
