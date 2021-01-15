@@ -61,6 +61,7 @@ class App(wx.App):
 			self.logger.info( 'Creating new config file...' )
 			config.createConfig()
 			self.logger.info( 'Config file created!' )
+		Path(f'{config.resourcesPath}cache/').mkdir(exist_ok=True)
 		# populate the config dict
 		config.currentConfigData = config.default_config
 		with open( config.configPath, 'r' ) as file:
