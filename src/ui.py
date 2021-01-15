@@ -28,7 +28,7 @@ class Root(wx.Frame):
 		# set the utilities.root pointer to the object of this class
 		super(Root, self).__init__(
 			parent=None,
-			title=f'BEE Package Maker {str(config.version)}',
+			title=loc( 'root.title', version=config.version.__str__() ),
 			size=wx.Size( width=600, height=500 )
 		)
 		Root.instance = self
@@ -36,6 +36,8 @@ class Root(wx.Frame):
 			self.SetPosition( wx.Point( config.load( 'mainWindowPos' ) ) )
 		except config.ConfigError:
 			self.CenterOnScreen()
+		if utilities.icon is not None:
+			self.SetIcon( utilities.icon )
 		self.SetSize( width=600, height=500 )
 		self.SetMinSize( wx.Size( width=600, height=500 ) )
 		logger.info( f'internet connected: {utilities.isonline()}' )
