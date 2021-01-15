@@ -13,7 +13,7 @@ import utilities
 logger = get_logger()
 overwriteDict: dict = {}
 configPath: Path = Path( './config.cfg' if utilities.frozen() else './../config.cfg' )
-assetsPath: str = './assets/' if utilities.frozen() else './../assets/'
+assetsPath: str = './resources/' if utilities.frozen() else './../resources/'
 """ The path to the assets folder (finishes with /) """
 tmpFolderPath: str = './tmp/' if utilities.frozen() else './../tmp/'
 """ The path to the tmp folder (finishes with /) """
@@ -31,7 +31,7 @@ default_config = {
 	'steamDir': None,
 	'portal2Dir': None,
 	'beePath': utilities.__getbee(),
-	'l18nFolderPath': './langs' if utilities.frozen() else './../langs',
+	'l18nFolderPath': f'{assetsPath}langs' if utilities.frozen() else f'{assetsPath}langs',
 	'onlineDatabaseUrl': 'https://beeapi.ddns.net:7090/api/',
 	'lang': 'en_US',
 	'startupUpdateCheck': True,
@@ -56,24 +56,21 @@ def load(section: str, default=None, useDisk=False) -> Union[str, int, bool, Non
 	"""
 	loads a section of the config (json-formatted) and return the data.
 	raise an exception if the config or the requested section doesn't exist
-	example::
+	example:
 
 		>>> import config
 		>>> print( config.load('version') )
 		2.6
 	:param default: if no value is found, return this value
 	:param section: section of the config to read
+	:param useDisk: if True will not use the cached settings
 	:returns: the readed data
 	"""
 	if section in overwriteDict.keys():
 		logger.debug('using overwrited data!')
 		return overwriteDict[section]
-	# is that section present?
-	if section in currentConfigData.keys() and not useDisk:
-		if dynConfig['logConfigActions']:
-			logger.info( f'loading {section}: {currentConfigData[ section ]}' )
-		return currentConfigData[section]
-	elif useDisk:
+	# this will use the file on disk instead of the cached settings
+	if useDisk:
 		# the config file exists?
 		if configPath.exists():
 			# yes, use it to load the configs
@@ -83,6 +80,11 @@ def load(section: str, default=None, useDisk=False) -> Union[str, int, bool, Non
 			if dynConfig['logConfigActions']:
 				logger.info(f'loading {section}: {readeData}')
 			return readeData  # return the readed data
+	# is that section present?
+	elif section in currentConfigData.keys():
+		if dynConfig['logConfigActions']:
+			logger.info( f'loading {section}: {currentConfigData[ section ]}' )
+		return currentConfigData[section]
 	# if the caller setted a default value, return it
 	if default is not None:
 		return default
@@ -308,7 +310,7 @@ def steamUsername():
 		return None
 
 
-def devMode() -> bool:
+def isDevMode() -> bool:
 	return load('devMode')
 
 
@@ -316,7 +318,3 @@ class ConfigError(BaseException):
 	"""
 	base error for config operations
 	"""
-
-
-if __name__ == '__main__':
-	pass
