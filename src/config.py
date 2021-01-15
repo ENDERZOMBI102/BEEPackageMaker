@@ -13,8 +13,8 @@ import utilities
 logger = get_logger()
 overwriteDict: dict = {}
 configPath: Path = Path( './config.cfg' if utilities.frozen() else './../config.cfg' )
-assetsPath: str = './resources/' if utilities.frozen() else './../resources/'
-""" The path to the assets folder (finishes with /) """
+resourcesPath: str = './resources/' if utilities.frozen() else './../resources/'
+""" The path to the resources folder (finishes with /) """
 tmpFolderPath: str = './tmp/' if utilities.frozen() else './../tmp/'
 """ The path to the tmp folder (finishes with /) """
 version: VersionInfo = VersionInfo(
@@ -31,7 +31,7 @@ default_config = {
 	'steamDir': None,
 	'portal2Dir': None,
 	'beePath': utilities.__getbee(),
-	'l18nFolderPath': f'{assetsPath}langs' if utilities.frozen() else f'{assetsPath}langs',
+	'l18nFolderPath': f'{resourcesPath}langs' if utilities.frozen() else f'{resourcesPath}langs',
 	'onlineDatabaseUrl': 'https://beeapi.ddns.net:7090/api/',
 	'lang': 'en_US',
 	'startupUpdateCheck': True,

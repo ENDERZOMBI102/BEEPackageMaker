@@ -1,13 +1,14 @@
 import os
 from pathlib import Path
-from typing import Union, overload, Any, Dict
+from typing import Union
+import webbrowser as wb
 
 import wx
 from srctools.logger import get_logger
 
+import aboutWindow
 import config
 import utilities
-from contentType.Item import Item
 from contentType.Package import Package
 
 if __name__ == '__main__':
@@ -57,13 +58,13 @@ class Root(wx.Frame):
 		# help menu bar
 		helpMenu = wx.Menu()
 		aboutItem: wx.MenuItem = helpMenu.Append( 13, loc( 'root.menu.help.about.name' ), loc( 'root.menu.help.about.description' ) )
-		aboutItem.SetBitmap( wx.Bitmap( f'{config.assetsPath}icons/menu_bm.png' ) )
+		# aboutItem.SetBitmap( wx.Bitmap( f'{config.resourcesPath}icons/menu_bm.png' ) )
 		wikiItem: wx.MenuItem = helpMenu.Append( 14, loc( 'root.menu.help.wiki.name' ), loc( 'root.menu.help.wiki.description' ) )
-		wikiItem.SetBitmap( wx.Bitmap( f'{config.assetsPath}icons/menu_github.png' ) )
+		# wikiItem.SetBitmap( wx.Bitmap( f'{config.resourcesPath}icons/menu_github.png' ) )
 		githubItem: wx.MenuItem = helpMenu.Append( 15, loc( 'root.menu.help.github.name' ), loc( 'root.menu.help.github.description' ) )
-		githubItem.SetBitmap( wx.Bitmap( f'{config.assetsPath}icons/menu_github.png' ) )
+		# githubItem.SetBitmap( wx.Bitmap( f'{config.resourcesPath}icons/menu_github.png' ) )
 		discordItem: wx.MenuItem = helpMenu.Append( 16, loc( 'root.menu.help.discord.name' ), loc( 'root.menu.help.discord.description' ) )
-		discordItem.SetBitmap( wx.Bitmap( f'{config.assetsPath}icons/menu_discord.png' ) )
+		# discordItem.SetBitmap( wx.Bitmap( f'{config.resourcesPath}icons/menu_discord.png' ) )
 		menuBar.Append( helpMenu, loc('root.menu.help.name') )
 
 		self.SetMenuBar( menuBar )
@@ -98,7 +99,11 @@ class Root(wx.Frame):
 		# items menu
 		self.Bind( wx.EVT_MENU, self.OnAddItem, addItemItem )
 		self.Bind( wx.EVT_MENU, self.OnRemoveItem, removeItemItem )
-
+		# help menu
+		self.Bind( wx.EVT_MENU, self.openAboutWindow, aboutItem )
+		self.Bind( wx.EVT_MENU, self.openWiki, wikiItem )
+		self.Bind( wx.EVT_MENU, self.openGithub, githubItem )
+		self.Bind( wx.EVT_MENU, self.openDiscord, discordItem )
 		# normal events
 		self.Bind( wx.EVT_LISTBOX, self.OnItemSelection, self.itemList )
 
@@ -186,6 +191,22 @@ class Root(wx.Frame):
 			if len( self.itemList.GetItems() ) == 0:
 				self.itemList.Append( loc('root.itemlist.empty') )
 
+	# help menu
+	def openAboutWindow( self, evt: wx.CommandEvent ):
+		aboutWindow.init()
+
+	@staticmethod
+	def openWiki( evt: wx.CommandEvent ):
+		utilities.openUrl( 'https://github.com/ENDERZOMBI102/BEE-manipulator/wiki' )
+
+	@staticmethod
+	def openGithub( evt: wx.CommandEvent ):
+		utilities.openUrl( 'https://github.com/ENDERZOMBI102/BEE-manipulator' )
+
+	@staticmethod
+	def openDiscord( evt: wx.CommandEvent ):
+		utilities.openUrl( 'https://discord.gg/hnGFJrz' )
+
 
 class ItemPanel(wx.Panel):
 
@@ -194,4 +215,3 @@ class ItemPanel(wx.Panel):
 			parent=master,
 			name=item
 		)
-
