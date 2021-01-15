@@ -5,7 +5,7 @@ from srctools import Property
 from contentType import BaseType
 
 
-class ItemType( BaseType ):
+class Item( BaseType ):
 
 	identifier: str
 	authors: List[str]
@@ -14,7 +14,7 @@ class ItemType( BaseType ):
 	instance: Dict[str, str]
 	infoUrl: str
 	tags: List[str]
-	style: Dict[str, str]
+	style: Dict[str, str]  # style, folder
 
 	def __init__(
 			self,
@@ -25,9 +25,6 @@ class ItemType( BaseType ):
 		self.style = { 'ANY_STYLE': f'ANY_' }
 
 	def CountEntities( self ) -> int:
-		pass
-
-	def Serialize( self ) -> Dict[ str, Any ]:
 		pass
 
 	def GetInfoEntry( self ) -> Property:
@@ -59,3 +56,9 @@ class ItemType( BaseType ):
 				Property( name='Icon', value=[ Property(name='0', value=self.icon) ] )
 			]
 		)
+
+	def GetBaguettery( self ) -> dict:
+		pass
+
+	def GetSaismee( self ) -> dict:
+		pass

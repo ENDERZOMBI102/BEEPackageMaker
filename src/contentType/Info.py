@@ -4,7 +4,7 @@ from typing import List, Dict, Any
 from srctools import Property
 
 from contentType import BaseType
-from contentType.itemType import ItemType
+from contentType.Item import Item
 
 
 class InfoFile:
@@ -12,13 +12,12 @@ class InfoFile:
 	name: str
 	description: str
 	dependencies: List[str] = None
-	content: List[ BaseType ]
 	identifier: str
 
 	def __init__(self):
 		pass
 
-	def Serialize( self ) -> Property:
+	def Serialize( self, contents: List[ BaseType ] ) -> Property:
 
 		serialized_data = Property(
 			name=None,
@@ -34,7 +33,7 @@ class InfoFile:
 				value=[ Property( name='Package', value=dep ) for dep in self.dependencies ]
 			)
 
-		for item in self.content:
+		for item in contents:
 			serialized_data += item.GetInfoEntry()
 
 		return serialized_data
@@ -46,5 +45,4 @@ if __name__ == '__main__':
 	info.identifier = 'TEST_PACKAGE'
 	info.description = 'A description'
 	info.dependencies = None
-	info.content = [ ItemType( identifier='TEST_PKG_ITM', folder='.') ]
-	pprint( [ x for x in info.Serialize().export() ] )
+	pprint( [ x for x in info.Serialize( [ Item( identifier='TEST_PKG_ITM' ) ] ).export() ] )
