@@ -194,16 +194,17 @@ class Root(wx.Frame):
 				self.itemList.Append( loc('root.itemlist.empty') )
 
 	# help menu
-	def openAboutWindow( self, evt: wx.CommandEvent ):
+	@staticmethod
+	def openAboutWindow( evt: wx.CommandEvent ):
 		aboutWindow.init()
 
 	@staticmethod
 	def openWiki( evt: wx.CommandEvent ):
-		utilities.openUrl( 'https://github.com/ENDERZOMBI102/BEE-manipulator/wiki' )
+		utilities.openUrl( 'https://github.com/ENDERZOMBI102/BEEPackageMaker/wiki' )
 
 	@staticmethod
 	def openGithub( evt: wx.CommandEvent ):
-		utilities.openUrl( 'https://github.com/ENDERZOMBI102/BEE-manipulator' )
+		utilities.openUrl( 'https://github.com/ENDERZOMBI102/BEEPackageMaker' )
 
 	@staticmethod
 	def openDiscord( evt: wx.CommandEvent ):
