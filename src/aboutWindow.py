@@ -25,7 +25,8 @@ class aboutWindow(wx.Frame):
 	def __init__(self):
 		super().__init__(wx.GetApp().root, title='About BEE Package Maker', style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
 		self.SetSize( wx.Size(300, 260) )
-		self.SetIcon( utilities.icon )
+		if utilities.icon is not None:
+			self.SetIcon( utilities.icon )
 		self.box = wx.html.HtmlWindow( self )
 		try:
 			self.logger.debug('trying to open about.html..')

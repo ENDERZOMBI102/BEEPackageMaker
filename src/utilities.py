@@ -16,8 +16,8 @@ import config
 from srctools.logger import get_logger
 
 logger = get_logger("utils")
-icon: wx.Icon
-"""BEE Manipulator icon as wx.Icon object"""
+icon: wx.Icon = None
+"""BEE Package Maker icon as wx.Icon object"""
 
 
 class wxStyles:
