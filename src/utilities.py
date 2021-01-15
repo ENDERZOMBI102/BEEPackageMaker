@@ -1,5 +1,6 @@
 import os
 import sys
+import webbrowser
 from io import BytesIO
 from pathlib import Path
 from sys import platform
@@ -123,18 +124,6 @@ def getReleaseUrl(data) -> str:
 		elif 'win' in asset['name'] and 'win' in platform:
 			return asset['browser_download_url']
 	raise Exception("how this happened?, you're on linux?")
-
-
-def isnegative(value: Union[None, bool]) -> bool:
-	"""
-	a function that checks if a value is negative (None, False, 0)
-	:param value:
-	:return:
-	"""
-	if value is None:
-		return True
-	else:
-		return not value
 
 
 def Downloader(url: str, title: str, message: str, animadots: bool = True) -> BytesIO:
@@ -274,26 +263,13 @@ def parseValue( param: str ) -> Union[str, int, float, None, bool]:
 	return float( param )
 
 
-def registerProtocol():
-	txt = r"""
-		Windows Registry Editor Version 5.00
-
-		[HKEY_CLASSES_ROOT\bm]
-		@="URL:bm"
-		"URL Protocol"=""
-
-		[HKEY_CLASSES_ROOT\bm\shell]
-
-		[HKEY_CLASSES_ROOT\bm\shell\open]
-
-		[HKEY_CLASSES_ROOT\bm\shell\open\command]
-		@="\"{} --bmurl\" \"%1\""
-	""".replace( '\t', '' ).replace( '\n', '', 1 ).replace( '{}', sys.executable.replace( '\\', '\\\\' ), 1 )
-	Path( config.tmpFolderPath ).mkdir( exist_ok=True )
-	regfile = Path( config.tmpFolderPath + 'protocol.reg' )
-	regfile.touch( exist_ok=True )
-	regfile.write_text( txt )
-	os.system( f'{str( regfile )}' )
+def openUrl(url: str):
+	"""
+	opens an url with the default browser
+	:param url: the url to open
+	"""
+	logger.info(f'opening "{url}" with default browser')
+	webbrowser.open(url)
 
 
 defBeePath = str( Path( str( Path( os.getenv('appdata') ).parent ) + '/Local/Programs/').resolve() ).replace(r'\\', '/')
