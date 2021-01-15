@@ -47,7 +47,6 @@ class App(wx.App):
 		self.logger = srctools.logger.get_logger( 'BEE Manipulator' )
 		# if we started with --dev parameter, set loglevel to debug
 		if '--dev' in argv:
-			config.overwrite( 'l18nFolderPath', './../langs' )
 			utilities.env = 'dev'
 		if '--flags' in argv:
 			flagIndex = argv.index( '--flags' ) + 1
