@@ -61,19 +61,22 @@ class Localize:
 		"""
 		builtins.loc = self.loc
 
-	def loc(self, textId) -> str:
+	def loc(self, textId: str, **kwargs) -> str:
 		"""
 		returns the localized text from a token
 		:param textId: the text id/token
 		:return: localized text
 		"""
-		try:
-			return self.localizations[ self.lang ][ textId ]
-		except KeyError:
-			logger.error(f'missing translation! key: {textId}')
-			if 'missingtranslation' in self.localizations[self.lang].keys():
-				return self.localizations[ self.lang ][ 'missingtranslation' ]
-			return 'OHNO'
+		if textId in self.localizations[ self.lang ].keys():
+			txt = self.localizations[ self.lang ][ textId ]
+			for key, value in kwargs.items():
+				txt = txt.replace('{' + key + '}', value)
+		else:
+			if 'missingtranslation' in self.localizations[ self.lang ].keys():
+				txt = self.localizations[ self.lang ][ 'missingtranslation' ]
+			else:
+				txt = 'OHNO'
+		return txt
 
 	def setLang(self, newLang: str):
 		"""
