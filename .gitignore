@@ -1,3 +1,5 @@
 config.cfg
 logs
 /env.bat
+/resources/about.html
+/resources/cache
