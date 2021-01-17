@@ -15,7 +15,10 @@ class InfoFile:
 	identifier: str
 
 	def __init__(self):
-		pass
+		self.name = 'Test'
+		self.identifier = 'TEST_PACKAGE'
+		self.description = 'A description'
+		self.dependencies = None
 
 	def Serialize( self, contents: List[ BaseType ] ) -> Property:
 
