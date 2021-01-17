@@ -18,6 +18,8 @@ localizeObj: 'Localize' = None
 if '--lang' in argv:
 	try:
 		lang = argv[argv.index('--lang') + 1]
+		if lang.startswith('--'):
+			raise IndexError()
 	except IndexError:
 		logger.error('missing value for command line parameter --lang! it will be ignored!')
 	else:
@@ -103,7 +105,7 @@ class Localize:
 			logger.error(f'NO LANG FOLDER FOUND!')
 			folder.mkdir()
 			logger.info('downloading english translation from github!')
-			self.dl('en_US')
+			self.downloadLanguage( 'en_US' )
 		logger.info(f'langs folder path is "{folder.absolute()}"')
 		langFile: Path
 		# iterate in all jlang files in the lang folder
@@ -116,7 +118,7 @@ class Localize:
 			logger.info(f'loaded lang file {langFile.name}!')
 		# repeat for all files
 
-	def dl(self, langToDownload: str):
+	def downloadLanguage( self, langToDownload: str ):
 		"""
 		downloads a language
 		:param langToDownload: id of the language
