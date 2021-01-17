@@ -5,7 +5,7 @@ from srctools import Property
 from contentType import BaseType
 
 
-class Item( BaseType ):
+class Item:
 
 	identifier: str
 	authors: List[str]
@@ -25,6 +25,9 @@ class Item( BaseType ):
 		self.style = { 'ANY_STYLE': f'ANY_' }
 
 	def CountEntities( self ) -> int:
+		pass
+
+	def CountBrushes( self ) -> int:
 		pass
 
 	def GetInfoEntry( self ) -> Property:
