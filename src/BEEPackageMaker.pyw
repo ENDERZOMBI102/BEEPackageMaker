@@ -14,6 +14,7 @@ import wx
 import config
 import timeTest
 import utilities
+from packageManager import PackageManager
 from ui import Root
 import localization
 
@@ -61,7 +62,6 @@ class App(wx.App):
 			self.logger.info( 'Creating new config file...' )
 			config.createConfig()
 			self.logger.info( 'Config file created!' )
-		Path(f'{config.resourcesPath}cache/').mkdir(exist_ok=True)
 		# populate the config dict
 		config.currentConfigData = config.default_config
 		with open( config.configPath, 'r' ) as file:
@@ -75,6 +75,9 @@ class App(wx.App):
 					else:
 						self.logger.info( 'Nothing to overwrite for this launch!' )
 					config.currentConfigData[ 'nextLaunch' ] = {}
+		# folders
+		Path( f'{config.resourcesPath}cache/' ).mkdir( exist_ok=True )
+		Path( f'{config.load("exportedPackagesDir")}' ).mkdir( exist_ok=True )
 		# start localizations
 		localization.Localize()
 		self.logger.info( f'current lang: {loc( "currentLang" )}' )
@@ -89,6 +92,7 @@ class App(wx.App):
 		self.logger.debug( "setted app name" )
 		# start ui
 		self.logger.info( f'Starting BEE Package Maker v{config.version}!' )
+		PackageManager.instance = PackageManager()
 		self.logger.info( 'starting ui!' )
 		self.root = Root()
 		return True
