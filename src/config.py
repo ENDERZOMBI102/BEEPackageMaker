@@ -33,6 +33,7 @@ default_config = {
 	'beePath': utilities.__getbee(),
 	'l18nFolderPath': f'{resourcesPath}langs' if utilities.frozen() else f'{resourcesPath}langs',
 	'onlineDatabaseUrl': 'https://beeapi.ddns.net:7090/api/',
+	'exportedPackagesDir': './exported/' if utilities.frozen() else './../exported/',
 	'lang': 'en_US',
 	'startupUpdateCheck': True,
 	'showSplashScreen': False,
@@ -131,7 +132,7 @@ def save(data, section):  # save a config
 				json.dump( currentConfigData, file, indent=4 )
 		except:
 			logger.error( f'failed to save config to disk!' )
-			raise ConfigError( 'error while saving the config' )
+			raise ConfigError( 'error while saving the config file' )
 
 
 def check(cfg: dict = None) -> bool:
@@ -230,7 +231,7 @@ def steamDir() -> str:
 				aKey = OpenKey(reg, r'Software\Valve\Steam')  # open the steam folder in the windows registry
 		except Exception as e:
 			logger.critical("Can't open windows registry! this is *VERY* bad!", exc_info=True)
-			raise
+			raise ConfigError(f"Can't open windows registry! this is *VERY* bad!\n{e}")
 		try:
 			keyValue = QueryValueEx(aKey, 'SteamPath')  # find the steam path
 			save(keyValue[0], 'steamDir')  # save the path, so we don't have to redo all this
@@ -281,7 +282,7 @@ def libraryFolders() -> list:
 			library['libraryfolders'].pop('timenextstatsreport')
 			library['libraryfolders'].pop('contentstatsid')
 	except Exception as e:
-		raise Exception(f'Error while reading steam library file: {e}')
+		raise ConfigError(f'Error while reading steam library file: {e}')
 
 	# check for other library paths, if the dict is empty, there's no one
 	if len( library['libraryfolders'] ) != 0:
@@ -314,7 +315,7 @@ def isDevMode() -> bool:
 	return load('devMode')
 
 
-class ConfigError(BaseException):
+class ConfigError(Exception):
 	"""
 	base error for config operations
 	"""
