@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import List
 
 import wx
@@ -55,7 +56,7 @@ class ItemPanel( wx.Panel ):
 
 	def OnItemSelection( self, name: str ):
 		self.SaveItem()
-		self.item = self.packageManager.GetItem( self.packageManager.GetID( name ) )
+		self.item = self.packageManager.GetItem( self.packageManager.GetItemID( name ) )
 		self.LoadItem()
 
 	def SaveItem( self ) -> None:
@@ -117,7 +118,10 @@ class InfoTab(wx.Panel):
 		self.SetSizer( sizer )
 
 	def SaveItem( self ) -> None:
-		pass
+		self.panel.item.icon = Path( self.icon.GetPath() )
+		self.panel.item.tags = self.tags
+		self.panel.item.infoUrl = self.infoUrl
+		self.panel.item.authors = self.authors.GetValue()
 
 	def LoadItem( self ) -> None:
 		self.icon.SetPath( self.panel.item.icon )
@@ -155,7 +159,7 @@ class DescriptionTab(wx.Panel):
 		pass
 
 	def SaveItem( self ) -> None:
-		pass
+		self.panel.item.description = self.desc.GetValue()
 
 	def LoadItem( self ) -> None:
 		self.desc.SetValue( self.panel.item.description )
@@ -189,7 +193,7 @@ class PlacementTab(wx.Panel):
 	def __init__( self, master: wx.BookCtrl ):
 		super( PlacementTab, self ).__init__(
 			parent=master,
-			name='PNL_ITEM_CONNECTION'
+			name='PNL_ITEM_PLACEMENT'
 		)
 		self.panel = master.GetParent()
 

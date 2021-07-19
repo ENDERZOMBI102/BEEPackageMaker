@@ -55,10 +55,18 @@ class PackageManager:
 				return item
 		return None
 
-	def GetID( self, name: str ) -> str:
+	def GetItemID( self, name: str ) -> str:
 		"""
-		Get a formatted id for a item name
+		Get a formatted id for an item name
 		:param name:
 		:return:
 		"""
 		return f'ITEM_{self.GetName().upper()}_{name.upper()}_BPM'
+
+	def GetStyleID( self, name: str ) -> str:
+		"""
+		Get a formatted id for a style name
+		:param name:
+		:return:
+		"""
+		return f'STYLE_{self.GetName().upper()}_{name.upper()}_BPM'

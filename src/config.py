@@ -1,22 +1,22 @@
 import json
 from pathlib import Path
-from typing import Dict, Union, Any, List
-from winreg import QueryValueEx, ConnectRegistry, HKEY_CURRENT_USER, OpenKey
+from typing import Dict, Union, Any, List, Optional
 
 from semver import VersionInfo
 from srctools import Property
 from srctools.logger import get_logger
+from srctools.tokenizer import TokenSyntaxError
 
 import utilities
 
 
 logger = get_logger()
 overwriteDict: dict = {}
-configPath: Path = Path( './config.cfg' if utilities.frozen() else './../config.cfg' )
-resourcesPath: str = './resources/' if utilities.frozen() else './../resources/'
-""" The path to the resources folder (finishes with /) """
-tmpFolderPath: str = './tmp/' if utilities.frozen() else './../tmp/'
-""" The path to the tmp folder (finishes with /) """
+configPath: Path = Path( './config.cfg' )
+resourcesPath: str = './resources'
+""" The path to the resources folder"""
+tmpFolderPath: str = './tmp'
+""" The path to the tmp folder"""
 version: VersionInfo = VersionInfo(
 	major=1,
 	minor=0,
@@ -31,9 +31,9 @@ default_config = {
 	'steamDir': None,
 	'portal2Dir': None,
 	'beePath': utilities.__getbee(),
-	'l18nFolderPath': f'{resourcesPath}langs' if utilities.frozen() else f'{resourcesPath}langs',
-	'onlineDatabaseUrl': 'https://beeapi.ddns.net:7090/api/',
-	'exportedPackagesDir': './exported/' if utilities.frozen() else './../exported/',
+	'l18nFolderPath': f'{resourcesPath}/langs',
+	'onlineDatabaseUrl': 'something',
+	'exportedPackagesDir': './exported',
 	'lang': 'en_US',
 	'startupUpdateCheck': True,
 	'showSplashScreen': False,
@@ -55,13 +55,14 @@ def createConfig():
 
 def load(section: str, default=None, useDisk=False) -> Union[str, int, bool, None, dict, list]:  # load a config
 	"""
-	loads a section of the config (json-formatted) and return the data.
+	Loads a section of the config (json-formatted) and return the data.
 	raise an exception if the config or the requested section doesn't exist
 	example:
 
 		>>> import config
 		>>> print( config.load('version') )
 		2.6
+	\t
 	:param default: if no value is found, return this value
 	:param section: section of the config to read
 	:param useDisk: if True will not use the cached settings
@@ -101,7 +102,7 @@ def load(section: str, default=None, useDisk=False) -> Union[str, int, bool, Non
 
 def save(data, section):  # save a config
 	"""
-	save the data on the config (json-formatted), re-create the config if no one is found.
+	Save the data on the config (json-formatted), re-create the config if no one is found.
 	example::
 		>>> import config
 		>>> print(config.load('version'))
@@ -109,6 +110,7 @@ def save(data, section):  # save a config
 		>>> config.save('2.5','version')
 		>>> print(config.load('version'))
 		'2.5'
+	\t
 	:param data: the data to save
 	:param section: the section of the config to save the data to
 	"""
@@ -135,37 +137,30 @@ def save(data, section):  # save a config
 			raise ConfigError( 'error while saving the config file' )
 
 
-def check(cfg: dict = None) -> bool:
-
+def check() -> bool:
 	"""
-	check if the config file exist and if is a BPM config file
-	:param cfg: optional string to use instead of reopening from the file system
+	Check if the config file exist and if is a BPM config file
+	\t
 	:return: True if is a valid config
 	"""
-	if cfg is None:
-		try:
-			with open(configPath, 'r') as file:
-				cfg = json.load(file)  # load the file
-		except FileNotFoundError:
-			return False
+	try:
+		with open(configPath, 'r') as file:
+			cfg = json.load(file)  # load the file
+	except FileNotFoundError:
+		return False
 	# check if EVERY config exists
 	for i in default_config.keys():
 		if i in cfg.keys():
 			continue
 		return False
 	# final check
-	if cfg['config_type'] == 'BEE2.4 Package Maker Config File':
-		# the check is made successfully
-		return True
-	else:
-		# the config file is not a BPM config file
-		return False
+	return cfg['config_type'] == default_config['config_type']
 
 
 def overwrite(section: str, data: any) -> None:
-
 	"""
-	overwrite in run time a config
+	Overwrite in run time a config
+	\t
 	:param section: the section that has to be overwritten
 	:param data: the value the section is overwritten with
 	:return: None
@@ -211,18 +206,17 @@ def overwriteOnNextLaunch(**kwargs) -> None:
 
 
 def steamDir() -> str:
-
 	"""
 	a function that retrieves the steam installation folder by reading the win registry
+	\t
 	:return: path to steam folder
 	:raises KeyError:
 	"""
-	if 'steamDir' not in currentConfigData.keys():
-		save(None, 'steamDir')  # create the config without value in case it doesn't exist
-
-	if not load('steamDir') is None:
+	steamFolder: str = ''
+	if load('steamDir') is not None:
 		return load('steamDir')  # return the folder
 	elif utilities.platform == 'win32':
+		from winreg import QueryValueEx, ConnectRegistry, HKEY_CURRENT_USER, OpenKey
 		# get the steam directory from the windows registry
 		# HKEY_CURRENT_USER\Software\Valve\Steam
 		try:
@@ -230,47 +224,65 @@ def steamDir() -> str:
 			with ConnectRegistry(None, HKEY_CURRENT_USER) as reg:
 				aKey = OpenKey(reg, r'Software\Valve\Steam')  # open the steam folder in the windows registry
 		except Exception as e:
-			logger.critical("Can't open windows registry! this is *VERY* bad!", exc_info=True)
-			raise ConfigError(f"Can't open windows registry! this is *VERY* bad!\n{e}")
+			logger.critical("Can't open windows registry! this is *VERY* bad!", exc_info=e)
+			raise
 		try:
 			keyValue = QueryValueEx(aKey, 'SteamPath')  # find the steam path
-			save(keyValue[0], 'steamDir')  # save the path, so we don't have to redo all this
-			return keyValue[0]
+			steamFolder = keyValue[0]
 		except:
 			raise KeyError("Can't open/find the steam registry keys")
+	elif utilities.platform == 'linux':
+		# the steam folder is 99.9% of the times located a t this path
+		# expand ~ to user folder path (/home/USERNAME/...)
+		steamFolder = str( Path( '~/.steam/steam' ).expanduser() )
+
+	if steamFolder:
+		save( steamFolder, 'steamDir' )  # save the path, so we don't have to redo all this
+		return steamFolder
+	else:
+		raise RuntimeError("Can't find the steam folder!")
 
 
 def portalDir() -> str:
-
 	"""
-	a function that retrives the portal 2 folder by searching in all possible libraries
+	A function that retrives the portal 2 folder by searching in all possible libraries
+	\t
 	:return: path to p2 folder
 	:raises FileNotFoundError:
 	"""
-	if not load('portal2Dir') is None:
-		return load('portal2Dir')  # check if we already saved the path, in case, return it
-	else:
-		# check every library if has p2 installed in it
-		library = libraryFolders()
-		for path in library:
-			try:
-				logger.info(f'searching in {path}..')
-				with open(path + 'appmanifest_620.acf', 'r') as file:
-					pass
-				# if yes save it
-				path += 'common/Portal 2/'
-				logger.info(f'portal 2 found! path: {path}')
-				save(path, 'portal2Dir')
+	if load('portal2Dir') is None:
+		save(getSteamAppDir(620), 'portal2Dir')
+	return load('portal2Dir')
+
+
+def getSteamAppDir(appid: int) -> str:
+	"""
+	A function that retrieves the folder of an app by searching in all possible libraries
+	\t
+	:param appid: The app's id to search for
+	:return: path to app's folder
+	:raises RuntimeError: raised when the app is not found
+	"""
+	for path in libraryFolders():
+		try:
+			logger.info(f'searching for {appid} in {path}..')
+			with open(f'{path}appmanifest_{appid}.acf', 'r') as file:
+				# found the app!
+				# get the app's name
+				instDir = Property.parse( file, f'appmanifest_{appid}.acf' ).as_dict()[ 'appstate' ][ 'installdir' ]
+				path += f'common/{instDir}/'
+				logger.info(f'{appid} found! path: {path}')
 				return path
-			except FileNotFoundError:
-				# if no, just continue
-				continue
+		except FileNotFoundError:
+			# if no, just continue
+			continue
+	raise RuntimeError(f'No path found for app {appid}!')
 
 
 def libraryFolders() -> list:
-
 	"""
 	Retrieves the steam library folders by parsing the libraryfolders.vdf file
+	\t
 	:return: a list with all library paths
 	"""
 	paths = [steamDir() + '/steamapps/']  # create a list for library paths
@@ -293,21 +305,18 @@ def libraryFolders() -> list:
 	return paths
 
 
-def steamUsername():
-
+def steamUsername() -> Optional[str]:
 	"""
-	retrives the steam username
+	Retrieves the steam username
+	\t
 	:return: steam username
 	"""
 	try:
-		with ConnectRegistry(None, HKEY_CURRENT_USER) as reg:
-			aKey = OpenKey(reg, r'Software\Valve\Steam')
-	except Exception as e:
-		raise e
-	try:
-		keyValue = QueryValueEx(aKey, 'LastGameNameUsed')
-		return keyValue[0]
-	except:
+		with open( f'{steamDir()}/config/loginusers.vdf' ) as file:
+			users = Property.parse( file, 'loginusers.vdf' ).as_dict()[ 'users' ]
+		# find the first user in the users dict and take is username
+		return users[ [ usr for usr in users.keys() ][ 0 ] ][ 'personaname' ]
+	except ( FileNotFoundError, TokenSyntaxError ):
 		return None
 
 
@@ -316,6 +325,4 @@ def isDevMode() -> bool:
 
 
 class ConfigError(Exception):
-	"""
-	base error for config operations
-	"""
+	"""	Base error for config operations """

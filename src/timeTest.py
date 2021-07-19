@@ -1,15 +1,19 @@
-from datetime import datetime
+import wx
+from srctools.logger import get_logger
 
-starTime: datetime
+
+stopwatch = wx.StopWatch()
 
 
 def start():
 	# starts the timer
-	global starTime
-	starTime = datetime.now()
+	stopwatch.Start()
 
 
 def stop():
-	#stops the timer
-	global starTime
-	print(f'time taken to start: { datetime.now() - starTime }')
+	# stops the timer
+	stopwatch.Pause()
+
+
+def logTime():
+	get_logger().info(f'Time taken to start: { stopwatch.Time() // 1000 }.{stopwatch.Time() % 1000}s')

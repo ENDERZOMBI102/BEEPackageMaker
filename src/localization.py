@@ -1,8 +1,6 @@
-import asyncio
 import builtins
 import json
 from pathlib import Path
-from sys import argv
 from typing import Dict, Callable
 
 import requests
@@ -10,20 +8,11 @@ import requests
 import config
 from srctools.logger import get_logger
 
+from cli import parsedArguments
+
 logger = get_logger()
 loc: Callable
 localizeObj: 'Localize' = None
-
-# check if a language is forced
-if '--lang' in argv:
-	try:
-		lang = argv[argv.index('--lang') + 1]
-		if lang.startswith('--'):
-			raise IndexError()
-	except IndexError:
-		logger.error('missing value for command line parameter --lang! it will be ignored!')
-	else:
-		config.overwrite('lang', lang)
 
 
 class LangNotSupportedError(Exception):
@@ -40,20 +29,15 @@ class Localize:
 	def __init__(self):
 		# get globals
 		global loc, localizeObj
+		# check language overwrite
+		if parsedArguments.lang is not None:
+			config.overwrite( 'lang', parsedArguments.lang )
 		# inject loc function to builtins
 		self.install()
 		# set globals
 		loc = self.loc
 		localizeObj = self
-		# run initialization
-		self.init()
-
-	def init(self):
-		"""
-		initialize localizations
-		this will load all .jlang files and the current language
-		:return:
-		"""
+		# Initialize localizations by loading all .jlang files and the current language
 		self.lang = config.load('lang')
 		self.loadLocFiles()
 
@@ -118,9 +102,11 @@ class Localize:
 			logger.info(f'loaded lang file {langFile.name}!')
 		# repeat for all files
 
-	def downloadLanguage( self, langToDownload: str ):
+	@staticmethod
+	def downloadLanguage( langToDownload: str ):
 		"""
-		downloads a language
+		Downloads a language
+		\t
 		:param langToDownload: id of the language
 		:return:
 		"""

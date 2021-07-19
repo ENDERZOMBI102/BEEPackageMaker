@@ -1,5 +1,6 @@
 import json
 import logging
+from logging import Logger
 import os
 import sys
 import traceback
@@ -14,12 +15,53 @@ import wx
 import config
 import timeTest
 import utilities
+from cli import parsedArguments
 from packageManager import PackageManager
 from ui import Root
 import localization
 
 if __name__ == '__helo__':
 	from localization import loc
+
+
+class WxLogHandler( wx.Log ):
+	""" Handle WX logging, and redirect it to Python's log system. """
+
+	# lookup table to convert WX log levels to stdlib equivalents.
+	levelLookupTable = {
+		wx.LOG_Debug: logging.DEBUG,
+		wx.LOG_Error: logging.ERROR,
+		wx.LOG_FatalError: logging.FATAL,
+		wx.LOG_Info: logging.INFO,
+		wx.LOG_Max: logging.DEBUG,
+		wx.LOG_Message: logging.INFO,
+		wx.LOG_Progress: logging.DEBUG,
+		wx.LOG_Status: logging.INFO,
+		wx.LOG_Trace: logging.DEBUG,
+		wx.LOG_User: logging.DEBUG,
+		wx.LOG_Warning: logging.WARNING,
+	}
+
+	def __init__( self ) -> None:
+		super().__init__()
+		self.logger: Logger = srctools.logger.get_logger( 'wxPython' )
+
+	# noinspection PyPropertyAccess
+	def DoLogRecord( self, level: int, msg: str, info: wx.LogRecordInfo ) -> None:
+		""" Pass the WX log system into the Python system. """
+		# Filename and function name are bytes, ew.
+		self.logger.handle(
+			self.logger.makeRecord(
+				'wxPython',
+				self.levelLookupTable.get( level, logging.INFO ),
+				info.filename.decode( 'utf8', 'ignore' ),
+				info.line,
+				msg,
+				(),  # It's already been formatted so no args are needed.
+				None,  # Exception info, not compatible.
+				info.func.decode( 'utf8', 'ignore' ),
+			)
+		)
 
 
 class App(wx.App):
@@ -40,19 +82,21 @@ class App(wx.App):
 		if not utilities.frozen():
 			os.environ[ 'SRCTOOLS_DEBUG' ] = '1'
 		# use a window to show the uncaught exception to the user
-		srctools.logger.init_logging(
+		self.logger = srctools.logger.init_logging(
 			filename='./logs/latest.log' if utilities.frozen() else './../logs/latest.log',
-			main_logger='BEE Manipulator',
+			main_logger='BEE Package Maker',
 			on_error=self.OnError
 		)
-		self.logger = srctools.logger.get_logger( 'BEE Manipulator' )
+		# log wx logging to python's logging module
+		wx.Log.SetActiveTarget( WxLogHandler() )
 		# if we started with --dev parameter, set loglevel to debug
-		if '--dev' in argv:
-			utilities.env = 'dev'
-		if '--flags' in argv:
-			flagIndex = argv.index( '--flags' ) + 1
-			if not argv[ flagIndex ].startswith( '--' ):
-				config.dynConfig.parseFlags( argv[ flagIndex ] )
+		if parsedArguments.dev:
+			config.overwrite( 'logLevel', 'DEBUG' )
+			config.overwrite( 'logWindowVisibility', True )
+			utilities.devEnv = True
+		if parsedArguments.flags is not None:
+			# add all flags
+			config.dynConfig.parseFlags( parsedArguments.flags )
 		# check configs
 		self.logger.info( 'Checking config file..' )
 		if config.check():
@@ -76,7 +120,8 @@ class App(wx.App):
 						self.logger.info( 'Nothing to overwrite for this launch!' )
 					config.currentConfigData[ 'nextLaunch' ] = {}
 		# folders
-		Path( f'{config.resourcesPath}cache/' ).mkdir( exist_ok=True )
+		# TODO: ADD THIS FOLDER TO CONFIG + EDIT THE utilities.tmpDirPath TO POINT TO THIS
+		Path( f'{config.resourcesPath}/cache/' ).mkdir( exist_ok=True )
 		Path( f'{config.load("exportedPackagesDir")}' ).mkdir( exist_ok=True )
 		# start localizations
 		localization.Localize()
@@ -125,20 +170,9 @@ class App(wx.App):
 
 
 if __name__ == '__main__':
-	# use file dir as working dir
-	path: Path = None
-	if utilities.frozen():
-		path = Path( sys.executable ).resolve()
-		print( f"BPM exe path: {path.parent.resolve()}" )
-	else:
-		path = Path( __file__ ).resolve()
-		print( 'BPM is running in a developer environment.' )
-		print( f"BPM source path: {path.parent}" )
-	os.chdir( path.parent )
-	timeStartup = '--time' in argv
-	if timeStartup:
-		timeTest.start()
+	print( f'BPM is running in a {"packed" if utilities.frozen() else "developer"} enviroment.' )
+	timeTest.start()
 	app = App()
-	if timeStartup:
+	if parsedArguments.time:
 		timeTest.stop()
 	app.MainLoop()

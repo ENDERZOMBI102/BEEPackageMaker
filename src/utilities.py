@@ -38,14 +38,15 @@ class UpdateInfo:
 		self.description = desc
 
 
-def _App__setIcon():
+def init():
 	global icon
 	icon = wx.Icon(f'{config.resourcesPath}icons/icon.png' )
 
 
 def isonline():
 	"""
-	simple function that checks if the pc is online or not
+	Simple function that checks if the pc is online or not
+	\t
 	:return: True if it is else False
 	"""
 	try:
@@ -60,6 +61,7 @@ def isonline():
 def checkUpdate(url: str, curVer: VersionInfo) -> UpdateInfo:
 	"""
 	A function that check for updates, this doesn't include prereleases
+	\t
 	:param url: the api/repo github url
 	:param curVer: current version
 	:return: an object of class VersionInfo
@@ -103,6 +105,7 @@ def genReleasesApiUrl(url: str = None) -> str:
 	"""
 	A function that makes a github api latest release url from a repo url
 	aram url: repo url to be transformed
+	\t
 	:return: the github api url
 	"""
 	splitUrl = url.split('/')  # slit the url in various segments
@@ -111,7 +114,8 @@ def genReleasesApiUrl(url: str = None) -> str:
 
 def getReleaseUrl(data) -> str:
 	"""
-	a function that return the correct release for the platform
+	A function that return the correct release for the platform
+	\t
 	:param data: the latest release data
 	:return: the asset url
 	"""
@@ -128,62 +132,10 @@ def getReleaseUrl(data) -> str:
 	raise Exception("how this happened?, you're on linux?")
 
 
-def Downloader(url: str, title: str, message: str, animadots: bool = True) -> BytesIO:
-	"""
-
-	:param url: url of the file to download
-	:param title: the title of the popup
-	:param message: the message of the popup
-	:param animadots: if the message has animated dots (defaults to True)
-	:return: a buffer with the downloaded bytes
-	"""
-	dots = 1
-	showProgress = config.dynConfig['logDownloadProgress']
-	if showProgress is None:
-		showProgress = False
-	# create progress dialog
-	dialog = wx.ProgressDialog(
-		parent=wx.GetTopLevelWindows()[0],
-		title=title,
-		message=message,
-		maximum=100
-	)
-	dialog.Update(0)  # update to 0 so it doesn't glitch
-	# working variables
-	messageWdots = message  # defaulting to the message
-	request = get(url, stream=True)  # the request
-	bytesdata = BytesIO()  # downloaded bytes
-	dl = 0  # how much has been downloaded
-	total_length = int(request.headers.get('content-length'))  # total length of the download (bytes)
-	# download!
-	if showProgress is True:
-		logger.info(f'downloading {url}!')
-	for data in request.iter_content(chunk_size=1024):
-		dl += len(data)
-		bytesdata.write(data)
-		done = int(100 * dl / total_length)
-		if animadots:
-			# set the message with dots for the animation
-			if dots == 1:
-				dots = 2
-				messageWdots = message + '.'
-			elif dots == 2:
-				dots = 3
-				messageWdots = message + '..'
-			elif dots == 3:
-				dots = 1
-				messageWdots = message + '...'
-		# if showProgress is true, show the progress on the log
-		if showProgress is True:
-			logger.info(f'total: {total_length}, bytes done: {dl}, done: {done}%')
-		# update with total % done and the message
-		dialog.Update(done, newmsg=messageWdots)
-	return bytesdata
-
-
 def frozen() -> bool:
 	"""
 	if BM is in a frozen state (exe), returns True
+	\t
 	:return: true if it is, otherwise false
 	"""
 	if getattr(sys, 'frozen', False):
@@ -220,15 +172,11 @@ def removeDir(path):
 	os.rmdir( path )
 
 
-def tempDirPath() -> str:
-	if frozen():
-		path = './../temp/'  # frozen
-	else:
-		path = './temp/'  # not frozen
-	fdr = Path(path)
+def tmpDirPath() -> str:
+	fdr = Path( config.tmpFolderPath )
 	if not fdr.exists():
 		fdr.mkdir()
-	return path
+	return str( fdr )
 
 
 def __getbee() -> Union[None, str]:
@@ -238,7 +186,7 @@ def __getbee() -> Union[None, str]:
 	return None
 
 
-def notimplementedyet():
+def notImplementedYet():
 	"""
 	shows a dialog that says that this feature its not implemented
 	"""
@@ -267,7 +215,8 @@ def parseValue( param: str ) -> Union[str, int, float, None, bool]:
 
 def openUrl(url: str):
 	"""
-	opens an url with the default browser
+	Opens an url with the default browser
+	\t
 	:param url: the url to open
 	"""
 	logger.info(f'opening "{url}" with default browser')

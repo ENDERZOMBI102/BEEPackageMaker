@@ -13,7 +13,7 @@ class Item(PackageComponent):
 	description: str
 	infoUrl: str
 	icon: Path
-	authors: List[str]
+	authors: str
 	tags: List[str]
 	# components
 	# a dict with styleId : Instance
