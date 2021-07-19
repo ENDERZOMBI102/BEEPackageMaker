@@ -1,12 +1,10 @@
-from typing import Any, Dict
+from abc import ABCMeta, abstractmethod
 
-from srctools import Property
+from ExportManager import ExportManager
 
 
-class BaseType:
+class PackageComponent(metaclass=ABCMeta):
 
-	def Serialize( self ) -> Dict[str, Any]:
-		pass
-
-	def GetInfoEntry( self ) -> Property:
+	@abstractmethod
+	def Export( self, manager: ExportManager ) -> None:
 		pass

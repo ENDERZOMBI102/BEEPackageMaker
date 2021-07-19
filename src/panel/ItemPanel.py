@@ -4,7 +4,7 @@ import wx
 import wx.lib.ticker
 
 import widgets
-from contentType.Item import Item
+from contentType.item import Item
 from packageManager import PackageManager
 from widgets import TextButton
 
@@ -16,11 +16,13 @@ class ItemPanel( wx.Panel ):
 
 	book: wx.BookCtrl
 	master: 'Root'
+	packageManager: 'PackageManager'
 	item: Item
 	_infoTab: 'InfoTab'
 	_descTab: 'DescriptionTab'
 	_instanceTab: 'InstanceTab'
 	_itemVarTab: 'ItemVarTab'
+	_placementTab: 'PlacementTab'
 	_propertyTab: 'PropertyTab'
 	_connTab: 'ConnectionTab'
 
@@ -31,6 +33,8 @@ class ItemPanel( wx.Panel ):
 		)
 		self.book = wx.BookCtrl(self)
 		self.master = master.GetParent()
+		self.packageManager = self.master.packageManager
+
 		self._infoTab = InfoTab( self.book )
 		self.book.AddPage( self._infoTab, loc('root.book.itempage.book.info.title') )
 		self._descTab = DescriptionTab(self.book)
@@ -39,6 +43,8 @@ class ItemPanel( wx.Panel ):
 		self.book.AddPage( self._instanceTab, loc('root.book.itempage.book.instances.title') )
 		self._itemVarTab = ItemVarTab( self.book )
 		self.book.AddPage( self._itemVarTab, loc('root.book.itempage.book.itemvar.title') )
+		self._placementTab = PlacementTab(self.book)
+		self.book.AddPage( self._placementTab, loc('root.book.itempage.book.placement.title') )
 		self._propertyTab = PropertyTab( self.book )
 		self.book.AddPage( self._propertyTab, loc('root.book.itempage.book.property.title') )
 		self._connTab = ConnectionTab( self.book )
@@ -49,17 +55,26 @@ class ItemPanel( wx.Panel ):
 
 	def OnItemSelection( self, name: str ):
 		self.SaveItem()
-		self.item = PackageManager.instance.package.GetItem(f'ITEM_{name.upper()}_BPM')
+		self.item = self.packageManager.GetItem( self.packageManager.GetID( name ) )
 		self.LoadItem()
 
-	def SaveItem( self ):
-		pass
+	def SaveItem( self ) -> None:
+		self._infoTab.SaveItem()
+		self._descTab.SaveItem()
+		self._connTab.SaveItem()
+		self._instanceTab.SaveItem()
+		self._itemVarTab.SaveItem()
+		self._placementTab.SaveItem()
+		self._propertyTab.SaveItem()
 
-	def LoadItem( self ):
-		self._infoTab.infoUrl = self.item.infoUrl
-		self._infoTab.tags = self.item.tags
-
-		self._descTab.desc = self.item.description
+	def LoadItem( self ) -> None:
+		self._infoTab.LoadItem()
+		self._descTab.LoadItem()
+		self._connTab.LoadItem()
+		self._instanceTab.LoadItem()
+		self._itemVarTab.LoadItem()
+		self._placementTab.LoadItem()
+		self._propertyTab.LoadItem()
 
 
 class InfoTab(wx.Panel):
@@ -68,8 +83,8 @@ class InfoTab(wx.Panel):
 	calcEntCount: TextButton
 	calcBrushCount: TextButton
 	authors: wx.TextCtrl
-	tags: List[str]  # TODO: This should be a thing in its own tab? the implementation may be funky and need space
 	infoUrl: str
+	tags: List[str]
 	panel: ItemPanel
 
 	def __init__( self, master: wx.BookCtrl ):
@@ -101,7 +116,10 @@ class InfoTab(wx.Panel):
 		sizer.Add( rightSizer, wx.SizerFlags( 1 ).Expand() )
 		self.SetSizer( sizer )
 
-	def LoadItem( self ):
+	def SaveItem( self ) -> None:
+		pass
+
+	def LoadItem( self ) -> None:
 		self.icon.SetPath( self.panel.item.icon )
 		self.tags = self.panel.item.tags
 		self.infoUrl = self.panel.item.infoUrl
@@ -136,8 +154,14 @@ class DescriptionTab(wx.Panel):
 	def OnDescChange( self, evt: wx.CommandEvent ):
 		pass
 
-	def LoadItem( self ):
+	def SaveItem( self ) -> None:
+		pass
+
+	def LoadItem( self ) -> None:
 		self.desc.SetValue( self.panel.item.description )
+
+	def GetDescription( self ) -> str:
+		return self.desc.GetValue()
 
 
 class InstanceTab(wx.Panel):
@@ -151,7 +175,28 @@ class InstanceTab(wx.Panel):
 		)
 		self.panel = master.GetParent()
 
-	def LoadItem( self ):
+	def SaveItem( self ) -> None:
+		pass
+
+	def LoadItem( self ) -> None:
+		pass
+
+
+class PlacementTab(wx.Panel):
+
+	panel: ItemPanel
+
+	def __init__( self, master: wx.BookCtrl ):
+		super( PlacementTab, self ).__init__(
+			parent=master,
+			name='PNL_ITEM_CONNECTION'
+		)
+		self.panel = master.GetParent()
+
+	def SaveItem( self ) -> None:
+		pass
+
+	def LoadItem( self ) -> None:
 		pass
 
 
@@ -166,7 +211,10 @@ class ConnectionTab(wx.Panel):
 		)
 		self.panel = master.GetParent()
 
-	def LoadItem( self ):
+	def SaveItem( self ) -> None:
+		pass
+
+	def LoadItem( self ) -> None:
 		pass
 
 
@@ -181,7 +229,10 @@ class ItemVarTab(wx.Panel):
 		)
 		self.panel = master.GetParent()
 
-	def LoadItem( self ):
+	def SaveItem( self ) -> None:
+		pass
+
+	def LoadItem( self ) -> None:
 		pass
 
 
@@ -196,5 +247,8 @@ class PropertyTab(wx.Panel):
 		)
 		self.panel = master.GetParent()
 
-	def LoadItem( self ):
+	def SaveItem( self ) -> None:
+		pass
+
+	def LoadItem( self ) -> None:
 		pass

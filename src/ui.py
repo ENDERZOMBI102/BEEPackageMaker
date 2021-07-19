@@ -10,6 +10,7 @@ import config
 import utilities
 from packageManager import PackageManager
 from panel.ItemPanel import ItemPanel
+from templates import TemplateManager
 
 if __name__ == '__main__':
 	from localization import loc
@@ -30,6 +31,8 @@ class Root(wx.Frame):
 	itemList: wx.ListBox
 	book: wx.BookCtrl
 	menus: Dict[str, wx.MenuItem]
+	paletteContextMenu: wx.Menu
+	templateManager: TemplateManager
 	itemPanel: ItemPanel
 
 	def __init__(self):
@@ -49,54 +52,147 @@ class Root(wx.Frame):
 		self.SetMinSize( wx.Size( width=600, height=500 ) )
 		logger.info( f'internet connected: {utilities.isonline()}' )
 
+		self.templateManager = TemplateManager()
+		self.packageManager = PackageManager()
+
 		# create the menu bar
 		self.menus = {}
 		menuBar = wx.MenuBar()
 		# file menu
 		fileMenu = wx.Menu()
-		self.menus['openPortalDirItem'] = fileMenu.Append( newMenuIndex(), loc( 'root.menu.file.openportaldir.name' ) + '\tCtrl-P', loc( 'root.menu.file.openportaldir.description' ) )
-		self.menus['openBeeDirItem'] = fileMenu.Append( newMenuIndex(), loc( 'root.menu.file.openbeedir.name' ) + '\tCtrl-B', loc( 'root.menu.file.openbeedir.description' ) )
-		self.menus['exitItem'] = fileMenu.Append( newMenuIndex(), loc( 'root.menu.file.exit.name' ), loc( 'root.menu.file.exit.description' ) )
+		self.menus['openPortalDirItem'] = fileMenu.Append(
+			newMenuIndex(),
+			item=loc( 'root.menu.file.openportaldir.name' ) + '\tCtrl-P',
+			helpString=loc( 'root.menu.file.openportaldir.description' )
+		)
+		self.menus['openBeeDirItem'] = fileMenu.Append(
+			newMenuIndex(),
+			item=loc( 'root.menu.file.openbeedir.name' ) + '\tCtrl-B',
+			helpString=loc( 'root.menu.file.openbeedir.description' )
+		)
+		self.menus[ 'settingsItem' ] = fileMenu.Append(
+			newMenuIndex(),
+			item=loc( 'root.menu.file.settings.name' ),
+			helpString=loc( 'root.menu.file.settings.description' )
+		)
+		self.menus['exitItem'] = fileMenu.Append(
+			newMenuIndex(),
+			item=loc( 'root.menu.file.exit.name' ),
+			helpString=loc( 'root.menu.file.exit.description' )
+		)
 		menuBar.Append( fileMenu, loc('root.menu.file.title') )
 
 		# item menu
 		itemMenu = wx.Menu()
-		self.menus['addItemItem'] = itemMenu.Append( newMenuIndex(), loc( 'root.menu.item.additem.name' ) + '\tCtrl-X', loc( 'root.menu.item.additem.description' ) )
-		self.menus['removeItemItem'] = itemMenu.Append( newMenuIndex(), loc( 'root.menu.item.removeitem.name' ), loc( 'root.menu.item.removeitem.description' ) )
+		self.menus['addItemItem'] = itemMenu.Append(
+			newMenuIndex(),
+			item=loc( 'root.menu.item.additem.name' ) + '\tCtrl-X',
+			helpString=loc( 'root.menu.item.additem.description' )
+		)
+		self.menus['removeItemItem'] = itemMenu.Append(
+			newMenuIndex(),
+			item=loc( 'root.menu.item.removeitem.name' ),
+			helpString=loc( 'root.menu.item.removeitem.description' )
+		)
 		menuBar.Append( itemMenu, loc('root.menu.item.title') )
 
 		# package menu
 		packageMenu = wx.Menu()
-		self.menus[ 'savePackageItem' ] = packageMenu.Append( newMenuIndex(), loc('root.menu.package.save.name'), loc('root.menu.package.save.description') )
+		self.menus[ 'savePackageItem' ] = packageMenu.Append(
+			newMenuIndex(),
+			item=loc('root.menu.package.save.name'),
+			helpString=loc('root.menu.package.save.description')
+		)
 		packageExportSubMenu = wx.Menu()
-		self.menus['exportToBEE36Item'] = packageExportSubMenu.Append( newMenuIndex(), loc('root.menu.package.export.beemod36.name'), loc('root.menu.package.export.beemod36.description') )
-		self.menus['exportToBEEItem'] = packageExportSubMenu.Append( newMenuIndex(), loc( 'root.menu.package.export.beemod.name' ), loc( 'root.menu.package.export.beemod.description' ) )
-		self.menus['exportToSaismeeItem'] = packageExportSubMenu.Append(newMenuIndex(), loc('root.menu.package.export.saismee.name'), loc('root.menu.package.export.saismee.description') )
-		self.menus['exportToBaguetteryItem'] = packageExportSubMenu.Append(newMenuIndex(), loc('root.menu.package.export.baguettery.name'), loc('root.menu.package.export.baguettery.description') )
+		self.menus['exportToBEE36Item'] = packageExportSubMenu.Append(
+			newMenuIndex(),
+			item=loc('root.menu.package.export.beemod36.name'),
+			helpString=loc('root.menu.package.export.beemod36.description')
+		)
+		self.menus['exportToBEEItem'] = packageExportSubMenu.Append(
+			newMenuIndex(),
+			item=loc( 'root.menu.package.export.beemod.name' ),
+			helpString=loc( 'root.menu.package.export.beemod.description' )
+		)
+		self.menus['exportToSaismeeItem'] = packageExportSubMenu.Append(
+			newMenuIndex(),
+			item=loc('root.menu.package.export.saismee.name'),
+			helpString=loc('root.menu.package.export.saismee.description')
+		)
+		self.menus['exportToBaguetteryItem'] = packageExportSubMenu.Append(
+			newMenuIndex(),
+			item=loc('root.menu.package.export.baguettery.name'),
+			helpString=loc('root.menu.package.export.baguettery.description')
+		)
 		packageMenu.AppendSubMenu( packageExportSubMenu, loc('root.menu.package.export.name') )
 		packageImportSubMenu = wx.Menu()
-		self.menus[ 'importFromBEE36Item' ] = packageImportSubMenu.Append( newMenuIndex(), loc('root.menu.package.export.beemod36.name' ), loc( 'root.menu.package.import.beemod36.description' ) )
-		self.menus[ 'importFromBEEItem' ] = packageImportSubMenu.Append( newMenuIndex(), loc( 'root.menu.package.export.beemod.name' ),loc('root.menu.package.import.beemod.description' ) )
-		self.menus[ 'importFromSaismeeItem' ] = packageImportSubMenu.Append( newMenuIndex(), loc('root.menu.package.export.saismee.name' ), loc( 'root.menu.package.import.saismee.description' ) )
-		self.menus[ 'importFromBaguetteryItem' ] = packageImportSubMenu.Append( newMenuIndex(), loc('root.menu.package.export.baguettery.name' ), loc( 'root.menu.package.import.baguettery.description' ) )
+		self.menus[ 'importFromBEE36Item' ] = packageImportSubMenu.Append(
+			newMenuIndex(),
+			item=loc('root.menu.package.export.beemod36.name' ),
+			helpString=loc( 'root.menu.package.import.beemod36.description' )
+		)
+		self.menus[ 'importFromBEEItem' ] = packageImportSubMenu.Append(
+			newMenuIndex(),
+			item=loc( 'root.menu.package.export.beemod.name' ),
+			helpString=loc('root.menu.package.import.beemod.description' )
+		)
+		self.menus[ 'importFromSaismeeItem' ] = packageImportSubMenu.Append(
+			newMenuIndex(),
+			item=loc('root.menu.package.export.saismee.name' ),
+			helpString=loc( 'root.menu.package.import.saismee.description' )
+		)
+		self.menus[ 'importFromBaguetteryItem' ] = packageImportSubMenu.Append(
+			newMenuIndex(),
+			item=loc('root.menu.package.export.baguettery.name' ),
+			helpString=loc( 'root.menu.package.import.baguettery.description' )
+		)
 		packageMenu.AppendSubMenu( packageImportSubMenu, loc( 'root.menu.package.import.name' ) )
 		menuBar.Append( packageMenu, loc('root.menu.package.title') )
 
-		# help menu bar
+		# templates menu
+		templatesMenu = wx.Menu()
+		self.menus['manageTemplates'] = templatesMenu.Append(
+			newMenuIndex(),
+			item=loc( 'root.menu.templates.manage.name' ),
+			helpString=loc( 'root.menu.templates.manage.description' )
+		)
+		menuBar.Append( templatesMenu, loc('root.menu.templates.title') )
+
+		# help menu
 		helpMenu = wx.Menu()
-		self.menus['aboutItem'] = helpMenu.Append( newMenuIndex(), loc( 'root.menu.help.about.name' ), loc( 'root.menu.help.about.description' ) )
+		self.menus['aboutItem'] = helpMenu.Append(
+			newMenuIndex(),
+			item=loc( 'root.menu.help.about.name' ),
+			helpString=loc( 'root.menu.help.about.description' )
+		)
 		# self.menus['aboutItem'].SetBitmap( wx.Bitmap( f'{config.resourcesPath}icons/menu_bm.png' ) )
-		self.menus['wikiItem'] = helpMenu.Append( newMenuIndex(), loc( 'root.menu.help.wiki.name' ), loc( 'root.menu.help.wiki.description' ) )
+		self.menus['wikiItem'] = helpMenu.Append(
+			newMenuIndex(),
+			item=loc( 'root.menu.help.wiki.name' ),
+			helpString=loc( 'root.menu.help.wiki.description' )
+		)
 		# self.menus['wikiItem'].SetBitmap( wx.Bitmap( f'{config.resourcesPath}icons/menu_github.png' ) )
-		self.menus['githubItem'] = helpMenu.Append( newMenuIndex(), loc( 'root.menu.help.github.name' ), loc( 'root.menu.help.github.description' ) )
+		self.menus['githubItem'] = helpMenu.Append(
+			newMenuIndex(),
+			item=loc( 'root.menu.help.github.name' ),
+			helpString=loc( 'root.menu.help.github.description' )
+		)
 		# self.menus['githubItem'].SetBitmap( wx.Bitmap( f'{config.resourcesPath}icons/menu_github.png' ) )
-		self.menus['discordItem'] = helpMenu.Append( newMenuIndex(), loc( 'root.menu.help.discord.name' ), loc( 'root.menu.help.discord.description' ) )
+		self.menus['discordItem'] = helpMenu.Append(
+			newMenuIndex(),
+			item=loc( 'root.menu.help.discord.name' ),
+			helpString=loc( 'root.menu.help.discord.description' )
+		)
 		# self.menus['discordItem'].SetBitmap( wx.Bitmap( f'{config.resourcesPath}icons/menu_discord.png' ) )
 		menuBar.Append( helpMenu, loc('root.menu.help.title') )
 
 		self.SetMenuBar( menuBar )
 		self.CreateStatusBar()
 		self.SetStatusText( loc( 'root.statusbar.text', username=config.steamUsername() ) )
+
+		self.paletteContextMenu = wx.Menu()
+		self.menus[ 'paletteCtxMenuRemoveSelected' ] = self.paletteContextMenu.Append( newMenuIndex(), loc( 'root.itemlist.menu.removeselected.name' ), loc( 'root.itemlist.menu.removeselected.description' ) )
+		self.menus[ 'paletteCtxMenuAddNew' ] = self.paletteContextMenu.Append( newMenuIndex(), loc( 'root.itemlist.menu.addnew.name' ), loc( 'root.itemlist.menu.addnew.description' ) )
 
 		self.itemList = wx.ListBox(
 			parent=self,
@@ -123,13 +219,14 @@ class Root(wx.Frame):
 		# file menu
 		self.Bind( wx.EVT_MENU, self.openp2dir, self.menus[ 'openPortalDirItem' ] )
 		self.Bind( wx.EVT_MENU, self.openBEEdir, self.menus[ 'openBeeDirItem' ] )
+		self.Bind( wx.EVT_MENU, self.OnSettings, self.menus[ 'settingsItem' ] )
 		self.Bind( wx.EVT_MENU, self.OnClose, self.menus[ 'exitItem' ] )
 		# items menu
 		self.Bind( wx.EVT_MENU, self.OnAddItem, self.menus[ 'addItemItem' ] )
 		self.Bind( wx.EVT_MENU, self.OnRemoveItem, self.menus[ 'removeItemItem' ] )
 		# package menu
-		self.Bind( wx.EVT_MENU, self.OnSave, self.menus[ 'savePackageItem' ])
-		self.Bind( wx.EVT_MENU, self.OnExport, self.menus[ 'exportToBEE36Item' ])
+		self.Bind( wx.EVT_MENU, self.OnSave, self.menus[ 'savePackageItem' ] )
+		self.Bind( wx.EVT_MENU, self.OnExport, self.menus[ 'exportToBEE36Item' ] )
 		self.Bind( wx.EVT_MENU, self.OnExport, self.menus[ 'exportToBEEItem' ] )
 		self.Bind( wx.EVT_MENU, self.OnExport, self.menus[ 'exportToSaismeeItem' ] )
 		self.Bind( wx.EVT_MENU, self.OnExport, self.menus[ 'exportToBaguetteryItem' ] )
@@ -137,13 +234,21 @@ class Root(wx.Frame):
 		self.Bind( wx.EVT_MENU, self.OnImport, self.menus[ 'importFromBEEItem' ] )
 		self.Bind( wx.EVT_MENU, self.OnImport, self.menus[ 'importFromSaismeeItem' ] )
 		self.Bind( wx.EVT_MENU, self.OnImport, self.menus[ 'importFromBaguetteryItem' ] )
+		# templates menu
+		self.Bind( wx.EVT_MENU, self.templateManager.ShowManager, self.menus['manageTemplates'] )
 		# help menu
 		self.Bind( wx.EVT_MENU, self.OpenAboutWindow, self.menus[ 'aboutItem' ] )
 		self.Bind( wx.EVT_MENU, self.OpenWiki, self.menus[ 'wikiItem' ] )
 		self.Bind( wx.EVT_MENU, self.OpenGithub, self.menus[ 'githubItem' ] )
 		self.Bind( wx.EVT_MENU, self.OpenDiscord, self.menus[ 'discordItem' ] )
+
+		# context menus events
+		self.Bind( wx.EVT_MENU, self.OnRemoveItem, self.menus[ 'paletteCtxMenuRemoveSelected' ] )
+		self.Bind( wx.EVT_MENU, self.OnAddItem, self.menus[ 'paletteCtxMenuAddNew' ] )
+
 		# normal events
 		self.Bind( wx.EVT_LISTBOX, self.OnItemSelection, self.itemList )
+		self.itemList.Bind( wx.EVT_RIGHT_UP, self.ShowIListContextMenu, self.itemList )
 
 		# window events
 		self.Bind( wx.EVT_CLOSE, self.OnClose, self )
@@ -171,6 +276,26 @@ class Root(wx.Frame):
 		else:
 			self.itemPanel.OnItemSelection( evt.GetString() )
 
+	def ShowIListContextMenu( self, evt: wx.MouseEvent ):
+		removeId = self.menus[ 'paletteCtxMenuRemoveSelected' ].GetId()
+		addId = self.menus[ 'paletteCtxMenuAddNew' ].GetId()
+
+		validPaletteItemSelected = True
+
+		# is a valid item selected?
+		if self.itemList.GetSelection() == wx.NOT_FOUND:
+			validPaletteItemSelected = False
+		elif self.itemList.GetString( self.itemList.GetSelection() ) == loc( 'root.itemlist.empty' ):
+			validPaletteItemSelected = False
+
+		# disable unwanted items
+		if validPaletteItemSelected:
+			self.paletteContextMenu.Enable( removeId, True )
+		else:
+			self.paletteContextMenu.Enable( removeId, False )
+
+		self.PopupMenu( self.paletteContextMenu, pos=evt.GetPosition() )
+
 	# menu items callbacks
 
 	# file menu
@@ -194,6 +319,12 @@ class Root(wx.Frame):
 			else Path( config.load( 'beePath' ) )
 		)
 
+	def OnReload( self, evt: wx.MenuEvent ):
+		pass
+
+	def OnSettings( self, evt: wx.MenuEvent ):
+		pass
+
 	# items menu
 	def OnAddItem( self, evt: wx.CommandEvent ):
 		while True:
@@ -204,14 +335,20 @@ class Root(wx.Frame):
 				value=loc( 'root.dialog.newitem.defvalue' )
 			)
 			diag.ShowModal()
-			if diag.GetValue() not in ['', ' ']:
-				if diag.GetValue() == loc( 'root.dialog.newitem.defvalue' ):
-					return
-				if diag.GetValue() not in self.itemList.GetItems():
-					self.itemList.Delete( self.itemList.FindString( loc('root.itemlist.empty') ) )
-					self.itemList.Insert( diag.GetValue(), 0 )
+			identifier = diag.GetValue()
+			if identifier not in ('', ' '):
+				if identifier in ( loc( 'root.dialog.newitem.defvalue' ), loc('root.itemlist.empty') ):
+					continue
+				if identifier not in self.itemList.GetItems():
+					# remove the empty package message
+					emptyItemIdex = self.itemList.FindString( loc('root.itemlist.empty') )
+					if emptyItemIdex != wx.NOT_FOUND:
+						self.itemList.Delete( emptyItemIdex )
+					self.packageManager.currentPackage.AddItem( identifier )
+					self.itemPanel.LoadItem( identifier )
+					self.itemList.Insert( identifier, 0 )
 					self.itemList.Select( 0 )
-					return
+					break
 
 	def OnRemoveItem( self, evt: wx.CommandEvent ):
 		if self.itemList.GetSelection() == wx.NOT_FOUND:
@@ -248,14 +385,51 @@ class Root(wx.Frame):
 			PackageManager.instance.ExportToBaguettery()
 
 	def OnImport( self, evt: wx.CommandEvent ):
-		if evt.GetId() == self.menus[ 'importFromBEE46Item' ].GetId():
-			PackageManager.instance.ImportFromPackageOld()
+		# ----- package extensions -----
+		# BEE 36: .zip, .vpk
+		# BEE 38+: .zip, .bee_pack, .vpk
+		# Baguettery: .ucp
+		# saismee: .spf
+		if evt.GetId() == self.menus[ 'importFromBEE36Item' ].GetId():
+			logger.info( 'will import a BEE2 4.36.x package' )
+			diag = wx.FileDialog(
+				parent=self,
+				message='Import BEE2 4.36.x packages',
+				wildcard='BEE2 4.36.x package file (*.zip;*.vpk)|*.zip;*.vpk',
+				style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
+			)
+			if diag.ShowModal() != wx.ID_CANCEL:
+				PackageManager.instance.ImportFromPackageOld( Path( diag.GetPath() ) )
 		elif evt.GetId() == self.menus[ 'importFromBEEItem' ].GetId():
-			PackageManager.instance.ImportFromPackage()
+			logger.info( 'will import a BEE2 4.38.1 package' )
+			diag = wx.FileDialog(
+				parent=self,
+				message='Import BEE2 4.38.1 packages',
+				wildcard='BEE2 4.38.x package file (*.bee_pack;*.zip;*.vpk)|*.bee_pack;*.zip;*.vpk',
+				style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
+			)
+			if diag.ShowModal() != wx.ID_CANCEL:
+				PackageManager.instance.ImportFromPackage( Path( diag.GetPath() ) )
 		elif evt.GetId() == self.menus[ 'importFromSaismeeItem' ].GetId():
-			PackageManager.instance.ImportFromSaismee()
+			logger.info( 'will import a BEEmaker package' )
+			diag = wx.FileDialog(
+				parent=self,
+				message='Import BEEmaker packages',
+				wildcard='BEEmaker package file (*.spf)|*.spf',
+				style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
+			)
+			if diag.ShowModal() != wx.ID_CANCEL:
+				PackageManager.instance.ImportFromSaismee( Path( diag.GetPath() ) )
 		else:  # this is self.menus[ 'importFromBaguetteryItem' ]
-			PackageManager.instance.ImportFromBaguettery()
+			logger.info( 'will import a UCP-UI package' )
+			diag = wx.FileDialog(
+				parent=self,
+				message='Import UCP_UI packages',
+				wildcard='UCP-UI package file (*.ucp)|*.ucp',
+				style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
+			)
+			if diag.ShowModal() != wx.ID_CANCEL:
+				PackageManager.instance.ImportFromBaguettery( Path( diag.GetPath() ) )
 
 	# help menu
 	@staticmethod

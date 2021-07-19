@@ -37,7 +37,7 @@ class aboutWindow(wx.Frame):
 			self.logger.warning('failed to load about.html! falling back to about.md')
 			self.logger.debug('opening about.md..')
 			# set the page to the converted markdown text
-			with open(f'{config.resourcesPath}/cache/about.md', 'r' ) as file:
+			with open(f'{config.resourcesPath}/about.md', 'r' ) as file:
 				self.logger.debug('converting markdown to html..')
 				data = markdown(file.read())
 			with open(f'{config.resourcesPath}/cache/about.html', 'w' ) as file:

@@ -1,43 +1,64 @@
-from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 import config
-from contentType.Package import Package
+from contentType.item import Item
+from exceptions import PackageNotFound
+from package import Package
 
 
 class PackageManager:
 
 	instance: 'PackageManager'
-	package: Package
-	packageList: List[Package]
+	_currentPackage: Package
+	packages: List[Package]
 
-	def __init__(self):
-		self.package = Package()
+	def CreatePackage( self, name: str ) -> None:
+		self.packages.append( Package(name) )
 
-	def ExportToBaguettery( self ) -> None:
-		folder = Path( f'{config.load( "exportedPackagesDir" )}/{self.package.info.name}_bag' )
-		folder.mkdir( exist_ok=True )
+	def SwitchTo( self, name: str ) -> None:
+		"""
+		Tries to switch to another package.
+		\t
+		:raises PackageNotFound: If the requested package isn't found.
+		:param name: The name of the package to switch to.
+		"""
+		pkg = self.FindPackage(name)
+		if pkg is None:
+			raise PackageNotFound(name)
+		self._currentPackage = pkg
 
-	def ExportToSaismee( self ) -> None:
-		folder = Path( f'{config.load( "exportedPackagesDir" )}/{self.package.info.name}_sai' )
-		folder.mkdir( exist_ok=True )
+	def FindPackage( self, name: str ) -> Optional[Package]:
+		"""
+		Checks if a package is present
+		\t
+		:param name: package's name
+		"""
+		for package in self.packages:
+			if package.name == name:
+				return package
+		return None
 
-	def ExportToPackage( self ) -> None:
-		folder = Path( f'{config.load( "exportedPackagesDir" )}/{self.package.info.name}_bee' )
-		folder.mkdir( exist_ok=True )
+	def GetName( self ) -> Optional[str]:
+		"""
+		getter for the name of the currently selected package
+		"""
+		return getattr(self._currentPackage, 'name', None)
 
-	def ExportToPackageOld( self ) -> None:
-		folder = Path( f'{config.load( "exportedPackagesDir" )}/{self.package.info.name}_b36' )
-		folder.mkdir( exist_ok=True )
+	def GetItem( self, name: str ) -> Optional[Item]:
+		"""
+		Getter for an item in the current package.
+		\t
+		:param name: name of the item
+		"""
+		for item in getattr(self._currentPackage, 'items', []):
+			if item.name == name:
+				return item
+		return None
 
-	def ImportFromBaguettery( self ) -> None:
-		pass
-
-	def ImportFromSaismee( self ) -> None:
-		pass
-
-	def ImportFromPackage( self ) -> None:
-		pass
-
-	def ImportFromPackageOld( self ) -> None:
-		pass
+	def GetID( self, name: str ) -> str:
+		"""
+		Get a formatted id for a item name
+		:param name:
+		:return:
+		"""
+		return f'ITEM_{self.GetName().upper()}_{name.upper()}_BPM'

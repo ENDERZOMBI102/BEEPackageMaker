@@ -1,10 +1,12 @@
+import importlib
 import os
 import sys
 import webbrowser
 from io import BytesIO
 from pathlib import Path
 from sys import platform
-from typing import Union
+from types import ModuleType
+from typing import Union, Callable
 
 import wx
 from requests import get, RequestException
