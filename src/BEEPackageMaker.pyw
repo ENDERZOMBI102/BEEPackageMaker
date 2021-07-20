@@ -126,14 +126,16 @@ class App(wx.App):
 		# actual init
 		self.logger.info( f'Starting BEE Package Maker v{config.version}!' )
 		self.logger.info( f'internet connected: {utilities.isonline()}' )
-		# set app name
-		self.logger.debug( "setting application name.." )
-		self.SetAppName( "BEE Package Maker" )
-		self.SetAppDisplayName( "BEE Package Maker" )
-		self.logger.debug( "setted app name" )
+		# set app metadata
+		self.logger.debug( 'setting application metadata..' )
+		self.SetAppName( 'BEE Package Maker' )
+		self.SetAppDisplayName( 'BEE Package Maker' )
+		self.SetVendorName( 'ENDERZOMBI102' )
+		self.SetVendorDisplayName( 'ENDERZOMBI102' )
 		# some init stuff
 		utilities.init()
 		# start managers
+		self.logger.debug( 'initializing managers..' )
 		packageManager.manager.Init()
 		exportManager.manager.Init()
 		templateManager.manager.Init()

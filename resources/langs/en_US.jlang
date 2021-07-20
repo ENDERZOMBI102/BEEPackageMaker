@@ -9,6 +9,8 @@
 	"root.menu.file.openbeedir.description": "Opens the BEEmod Folder in explorer",
 	"root.menu.file.settings.name": "Settings",
 	"root.menu.file.settings.description": "Opens the application settings",
+	"root.menu.file.toggleLogWindow.name": "Toggle log window",
+	"root.menu.file.toggleLogWindow.description": "Toggles the log window visibility",
 	"root.menu.file.exit.name": "Exit",
 	"root.menu.file.exit.description": "Exit the application",
 	"root.menu.item.title": "Item",

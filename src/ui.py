@@ -73,6 +73,11 @@ class Root(wx.Frame):
 			item=loc( 'root.menu.file.settings.name' ),
 			helpString=loc( 'root.menu.file.settings.description' )
 		)
+		self.menus[ 'logWindowItem' ] = fileMenu.Append(
+			newMenuIndex(),
+			item=loc( 'root.menu.file.toggleLogWindow.name' ) + '\tCtrl-L',
+			helpString=loc( 'root.menu.file.toggleLogWindow.description' )
+		)
 		self.menus['exitItem'] = fileMenu.Append(
 			newMenuIndex(),
 			item=loc( 'root.menu.file.exit.name' ),
@@ -218,6 +223,7 @@ class Root(wx.Frame):
 		self.Bind( wx.EVT_MENU, self.openp2dir, self.menus[ 'openPortalDirItem' ] )
 		self.Bind( wx.EVT_MENU, self.openBEEdir, self.menus[ 'openBeeDirItem' ] )
 		self.Bind( wx.EVT_MENU, self.OnSettings, self.menus[ 'settingsItem' ] )
+		self.Bind( wx.EVT_MENU, logWindow.toggleVisibility, self.menus[ 'logWindowItem' ] )
 		self.Bind( wx.EVT_MENU, self.OnClose, self.menus[ 'exitItem' ] )
 		# items menu
 		self.Bind( wx.EVT_MENU, self.OnAddItem, self.menus[ 'addItemItem' ] )
@@ -266,6 +272,7 @@ class Root(wx.Frame):
 		config.save( pos, 'mainWindowPos' )
 		config.save( None, 'placeholderForSaving' )
 		self.Destroy()
+		wx.Exit()
 
 	# item list callback
 

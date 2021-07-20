@@ -36,7 +36,7 @@ default_config = {
 	'cacheDirPath': f'{resourcesPath}/cache',
 	'apiUrl': 'something',
 	'logWindowVisibility': utilities.frozen(),
-	'logLevel': '',
+	'logLevel': 'info' if utilities.frozen() else 'debug',
 	'lang': 'en_US',
 	'startupUpdateCheck': True,
 	'showSplashScreen': False,
