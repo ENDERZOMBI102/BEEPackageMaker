@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List
 
-from ExportManager import ExportManager
+from exportManager import ExportManager
 from contentType import PackageComponent
 
 

@@ -7,13 +7,13 @@ from srctools.logger import get_logger
 
 import aboutWindow
 import config
+import logWindow
 import utilities
-from packageManager import PackageManager
 from panel.ItemPanel import ItemPanel
-from templates import TemplateManager
-
-if __name__ == '__main__':
-	from localization import loc
+# managers
+from packageManager import manager as PackageManager
+from templateManager import manager as TemplateManager
+from exportManager import manager as ExportManager
 
 
 logger = get_logger('Root Window')
@@ -32,7 +32,6 @@ class Root(wx.Frame):
 	book: wx.BookCtrl
 	menus: Dict[str, wx.MenuItem]
 	paletteContextMenu: wx.Menu
-	templateManager: TemplateManager
 	itemPanel: ItemPanel
 
 	def __init__(self):
@@ -50,10 +49,9 @@ class Root(wx.Frame):
 			self.SetIcon( utilities.icon )
 		self.SetSize( width=600, height=500 )
 		self.SetMinSize( wx.Size( width=600, height=500 ) )
-		logger.info( f'internet connected: {utilities.isonline()}' )
 
-		self.templateManager = TemplateManager()
-		self.packageManager = PackageManager()
+		# log window
+		logWindow.init(self)
 
 		# create the menu bar
 		self.menus = {}
@@ -235,7 +233,7 @@ class Root(wx.Frame):
 		self.Bind( wx.EVT_MENU, self.OnImport, self.menus[ 'importFromSaismeeItem' ] )
 		self.Bind( wx.EVT_MENU, self.OnImport, self.menus[ 'importFromBaguetteryItem' ] )
 		# templates menu
-		self.Bind( wx.EVT_MENU, self.templateManager.ShowManager, self.menus['manageTemplates'] )
+		self.Bind( wx.EVT_MENU, TemplateManager.ShowManager, self.menus['manageTemplates'] )
 		# help menu
 		self.Bind( wx.EVT_MENU, self.OpenAboutWindow, self.menus[ 'aboutItem' ] )
 		self.Bind( wx.EVT_MENU, self.OpenWiki, self.menus[ 'wikiItem' ] )
@@ -259,6 +257,7 @@ class Root(wx.Frame):
 	def OnClose( self, evt: Union[wx.CloseEvent, wx.MenuEvent] ):
 		"""
 		called when the window/application is about to close
+		\t
 		:param evt: placeholder
 		"""
 		# get the window position and save it
@@ -274,7 +273,7 @@ class Root(wx.Frame):
 		if self.itemList.GetString( self.itemList.GetSelection() ) == loc('root.itemlist.empty'):
 			self.itemList.Deselect(0)
 		else:
-			self.itemPanel.OnItemSelection( evt.GetString() )
+			self.itemPanel.SwitchTo( evt.GetString() )
 
 	def ShowIListContextMenu( self, evt: wx.MouseEvent ):
 		removeId = self.menus[ 'paletteCtxMenuRemoveSelected' ].GetId()
@@ -335,18 +334,18 @@ class Root(wx.Frame):
 				value=loc( 'root.dialog.newitem.defvalue' )
 			)
 			diag.ShowModal()
-			identifier = diag.GetValue()
-			if identifier not in ('', ' '):
-				if identifier in ( loc( 'root.dialog.newitem.defvalue' ), loc('root.itemlist.empty') ):
+			name = diag.GetValue()
+			if name not in ('', ' '):
+				if name in ( loc( 'root.dialog.newitem.defvalue' ), loc('root.itemlist.empty') ):
 					continue
-				if identifier not in self.itemList.GetItems():
+				if name not in self.itemList.GetItems():
 					# remove the empty package message
 					emptyItemIdex = self.itemList.FindString( loc('root.itemlist.empty') )
 					if emptyItemIdex != wx.NOT_FOUND:
 						self.itemList.Delete( emptyItemIdex )
-					self.packageManager.currentPackage.AddItem( identifier )
-					self.itemPanel.LoadItem( identifier )
-					self.itemList.Insert( identifier, 0 )
+					PackageManager.CreateItem( name )
+					self.itemPanel.SwitchTo( name )
+					self.itemList.Insert( name, 0 )
 					self.itemList.Select( 0 )
 					break
 
@@ -376,13 +375,13 @@ class Root(wx.Frame):
 
 	def OnExport( self, evt: wx.CommandEvent ):
 		if evt.GetId() == self.menus[ 'exportToBEE36Item' ].GetId():
-			PackageManager.instance.ExportToPackageOld()
+			PackageManager.ExportToPackageOld()
 		elif evt.GetId() == self.menus[ 'exportToBEEItem' ].GetId():
-			PackageManager.instance.ExportToPackage()
+			PackageManager.ExportToPackage()
 		elif evt.GetId() == self.menus[ 'exportToSaismeeItem' ].GetId():
-			PackageManager.instance.ExportToSaismee()
+			PackageManager.ExportToSaismee()
 		else:  # this is self.menus[ 'exportToBaguetteryItem' ]
-			PackageManager.instance.ExportToBaguettery()
+			PackageManager.ExportToBaguettery()
 
 	def OnImport( self, evt: wx.CommandEvent ):
 		# ----- package extensions -----
@@ -399,7 +398,7 @@ class Root(wx.Frame):
 				style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
 			)
 			if diag.ShowModal() != wx.ID_CANCEL:
-				PackageManager.instance.ImportFromPackageOld( Path( diag.GetPath() ) )
+				PackageManager.ImportFromPackageOld( Path( diag.GetPath() ) )
 		elif evt.GetId() == self.menus[ 'importFromBEEItem' ].GetId():
 			logger.info( 'will import a BEE2 4.38.1 package' )
 			diag = wx.FileDialog(
@@ -409,7 +408,7 @@ class Root(wx.Frame):
 				style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
 			)
 			if diag.ShowModal() != wx.ID_CANCEL:
-				PackageManager.instance.ImportFromPackage( Path( diag.GetPath() ) )
+				PackageManager.ImportFromPackage( Path( diag.GetPath() ) )
 		elif evt.GetId() == self.menus[ 'importFromSaismeeItem' ].GetId():
 			logger.info( 'will import a BEEmaker package' )
 			diag = wx.FileDialog(
@@ -419,7 +418,7 @@ class Root(wx.Frame):
 				style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
 			)
 			if diag.ShowModal() != wx.ID_CANCEL:
-				PackageManager.instance.ImportFromSaismee( Path( diag.GetPath() ) )
+				PackageManager.ImportFromSaismee( Path( diag.GetPath() ) )
 		else:  # this is self.menus[ 'importFromBaguetteryItem' ]
 			logger.info( 'will import a UCP-UI package' )
 			diag = wx.FileDialog(
@@ -429,7 +428,7 @@ class Root(wx.Frame):
 				style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
 			)
 			if diag.ShowModal() != wx.ID_CANCEL:
-				PackageManager.instance.ImportFromBaguettery( Path( diag.GetPath() ) )
+				PackageManager.ImportFromBaguettery( Path( diag.GetPath() ) )
 
 	# help menu
 	@staticmethod

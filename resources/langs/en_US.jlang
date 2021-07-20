@@ -11,7 +11,7 @@
 	"root.menu.file.settings.description": "Opens the application settings",
 	"root.menu.file.exit.name": "Exit",
 	"root.menu.file.exit.description": "Exit the application",
-	"root.menu.item.title": "Items",
+	"root.menu.item.title": "Item",
 	"root.menu.item.additem.name": "Add Item",
 	"root.menu.item.additem.description": "Adds an item to the list",
 	"root.menu.item.removeitem.name": "Remove Selected Item",

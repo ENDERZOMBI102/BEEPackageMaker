@@ -40,7 +40,7 @@ class UpdateInfo:
 
 def init():
 	global icon
-	icon = wx.Icon(f'{config.resourcesPath}icons/icon.png' )
+	icon = wx.Icon(f'{config.resourcesPath}/icons/icon.png' )
 
 
 def isonline():

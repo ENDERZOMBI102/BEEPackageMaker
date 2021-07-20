@@ -27,14 +27,16 @@ version: VersionInfo = VersionInfo(
 
 default_config = {
 	'config_type': 'BEE2.4 Package Maker Config File',
-	'usePrereleases': False if utilities.frozen() else True,
+	'usePrereleases': not utilities.frozen(),
 	'steamDir': None,
 	'portal2Dir': None,
 	'beePath': utilities.__getbee(),
 	'l18nFolderPath': f'{resourcesPath}/langs',
 	'exportedPackagesDir': './exported',
 	'cacheDirPath': f'{resourcesPath}/cache',
-	'onlineDatabaseUrl': 'something',
+	'apiUrl': 'something',
+	'logWindowVisibility': utilities.frozen(),
+	'logLevel': '',
 	'lang': 'en_US',
 	'startupUpdateCheck': True,
 	'showSplashScreen': False,

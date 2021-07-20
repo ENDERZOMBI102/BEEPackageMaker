@@ -6,7 +6,7 @@ import wx.lib.ticker
 
 import widgets
 from contentType.item import Item
-from packageManager import PackageManager
+from packageManager import manager as PackageManager
 from widgets import TextButton
 
 if __name__ == '__main__':
@@ -17,7 +17,6 @@ class ItemPanel( wx.Panel ):
 
 	book: wx.BookCtrl
 	master: 'Root'
-	packageManager: 'PackageManager'
 	item: Item
 	_infoTab: 'InfoTab'
 	_descTab: 'DescriptionTab'
@@ -34,7 +33,6 @@ class ItemPanel( wx.Panel ):
 		)
 		self.book = wx.BookCtrl(self)
 		self.master = master.GetParent()
-		self.packageManager = self.master.packageManager
 
 		self._infoTab = InfoTab( self.book )
 		self.book.AddPage( self._infoTab, loc('root.book.itempage.book.info.title') )
@@ -54,9 +52,9 @@ class ItemPanel( wx.Panel ):
 		sizer.Add( self.book, wx.SizerFlags(1).Expand() )
 		self.SetSizer( sizer )
 
-	def OnItemSelection( self, name: str ):
+	def SwitchTo( self, name: str ):
 		self.SaveItem()
-		self.item = self.packageManager.GetItem( self.packageManager.GetItemID( name ) )
+		self.item = PackageManager.GetItem( identifier=PackageManager.GetItemID( name ) )
 		self.LoadItem()
 
 	def SaveItem( self ) -> None:

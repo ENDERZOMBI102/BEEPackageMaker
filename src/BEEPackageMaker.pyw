@@ -125,11 +125,14 @@ class App(wx.App):
 			return False
 		# actual init
 		self.logger.info( f'Starting BEE Package Maker v{config.version}!' )
+		self.logger.info( f'internet connected: {utilities.isonline()}' )
 		# set app name
 		self.logger.debug( "setting application name.." )
 		self.SetAppName( "BEE Package Maker" )
 		self.SetAppDisplayName( "BEE Package Maker" )
 		self.logger.debug( "setted app name" )
+		# some init stuff
+		utilities.init()
 		# start managers
 		packageManager.manager.Init()
 		exportManager.manager.Init()
@@ -137,6 +140,8 @@ class App(wx.App):
 		# start ui
 		self.logger.info( 'starting ui!' )
 		self.root = Root()
+		self.SetTopWindow(self.root)
+		self.SetExitOnFrameDelete(True)
 		return True
 
 	def OnExit(self):

@@ -43,19 +43,20 @@ class PackageManager(AbstractManager):
 		return None
 
 	def GetName( self ) -> Optional[str]:
-		"""
-		getter for the name of the currently selected package
-		"""
+		""" Getter for the name of the currently selected package """
 		return getattr(self._currentPackage, 'name', None)
 
-	def GetItem( self, name: str ) -> Optional[Item]:
+	def GetItem( self, name: str = None, identifier: str = None ) -> Optional[Item]:
 		"""
 		Getter for an item in the current package.
 		\t
-		:param name: name of the item
+		:param name: Name of the item
+		:param identifier: Identifier of the item
 		"""
 		for item in getattr(self._currentPackage, 'items', []):
-			if item.name == name:
+			if name is not None and item.name == name:
+				return item
+			if identifier is not None and item.identifier == identifier:
 				return item
 		return None
 
@@ -74,6 +75,22 @@ class PackageManager(AbstractManager):
 		:return:
 		"""
 		return f'STYLE_{self.GetName().upper()}_{name.upper()}_BPM'
+
+	def GetCurrent( self ) -> Optional[Package]:
+		"""	Getter for the current package """
+		return self._currentPackage
+
+	def CreateItem( self, name: str ) -> None:
+		"""
+		Creates an item object with the specified name and adds it to the current package.
+		\t
+		:param name: Name of the item.
+		:return: The created item.
+		"""
+		item = Item()
+		item.name = name
+		item.identifier = self.GetItemID(name)
+		self._currentPackage.items.append( item )
 
 
 manager: PackageManager = PackageManager()
