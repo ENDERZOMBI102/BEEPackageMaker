@@ -1,19 +1,14 @@
-import importlib
 import os
 import sys
 import webbrowser
-from io import BytesIO
 from pathlib import Path
 from sys import platform
-from types import ModuleType
-from typing import Union, Callable
+from typing import Union
 
 import wx
 from requests import get, RequestException
 from semver import VersionInfo
 
-if __name__ == '__main__':
-	from localization import loc
 import config
 from srctools.logger import get_logger
 
