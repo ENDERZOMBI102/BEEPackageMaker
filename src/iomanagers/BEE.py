@@ -1,15 +1,13 @@
-from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
+from iomanagers import AbstractIOManager
 from package import Package
 
 
-class AbstractIOManager(meta=ABCMeta):
+class BeeIOManager(AbstractIOManager):
 
-	@abstractmethod
 	def Serialize( self, package: Package ):
 		pass
 
-	@abstractmethod
 	def Deserialize( self, package: Path ):
 		pass

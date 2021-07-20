@@ -172,8 +172,8 @@ def removeDir(path):
 	os.rmdir( path )
 
 
-def tmpDirPath() -> str:
-	fdr = Path( config.tmpFolderPath )
+def cacheDirPath() -> str:
+	fdr = Path( config.load('cacheDirPath') )
 	if not fdr.exists():
 		fdr.mkdir()
 	return str( fdr )

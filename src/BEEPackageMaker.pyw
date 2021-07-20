@@ -4,8 +4,6 @@ from logging import Logger
 import os
 import sys
 import traceback
-from pathlib import Path
-from sys import argv
 from types import TracebackType
 from typing import Type
 
@@ -13,15 +11,14 @@ import srctools.logger
 import wx
 
 import config
+import exportManager
+import packageManager
+import templateManager
 import timeTest
 import utilities
 from cli import parsedArguments
-from packageManager import PackageManager
 from ui import Root
 import localization
-
-if __name__ == '__helo__':
-	from localization import loc
 
 
 class WxLogHandler( wx.Log ):
@@ -119,10 +116,6 @@ class App(wx.App):
 					else:
 						self.logger.info( 'Nothing to overwrite for this launch!' )
 					config.currentConfigData[ 'nextLaunch' ] = {}
-		# folders
-		# TODO: ADD THIS FOLDER TO CONFIG + EDIT THE utilities.tmpDirPath TO POINT TO THIS
-		Path( f'{config.resourcesPath}/cache/' ).mkdir( exist_ok=True )
-		Path( f'{config.load("exportedPackagesDir")}' ).mkdir( exist_ok=True )
 		# start localizations
 		localization.Localize()
 		self.logger.info( f'current lang: {loc( "currentLang" )}' )
@@ -130,19 +123,27 @@ class App(wx.App):
 	def OnInit( self ):
 		if self.ShouldExit:
 			return False
+		# actual init
+		self.logger.info( f'Starting BEE Package Maker v{config.version}!' )
 		# set app name
 		self.logger.debug( "setting application name.." )
 		self.SetAppName( "BEE Package Maker" )
 		self.SetAppDisplayName( "BEE Package Maker" )
 		self.logger.debug( "setted app name" )
+		# start managers
+		packageManager.manager.Init()
+		exportManager.manager.Init()
+		templateManager.manager.Init()
 		# start ui
-		self.logger.info( f'Starting BEE Package Maker v{config.version}!' )
-		PackageManager.instance = PackageManager()
 		self.logger.info( 'starting ui!' )
 		self.root = Root()
 		return True
 
 	def OnExit(self):
+		# stop managers
+		packageManager.manager.Stop()
+		exportManager.manager.Stop()
+		templateManager.manager.Stop()
 		with open( config.configPath, 'w' ) as file:
 			json.dump( config.currentConfigData, file, indent=4 )
 		if config.dynConfig[ 'continueLoggingOnUncaughtException' ]:

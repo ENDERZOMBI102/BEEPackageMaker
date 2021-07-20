@@ -1,16 +1,20 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 
-import config
+from abstract.manager import AbstractManager
 from contentType.item import Item
 from exceptions import PackageNotFound
 from package import Package
 
 
-class PackageManager:
-
-	instance: 'PackageManager'
+class PackageManager(AbstractManager):
 	_currentPackage: Package
 	packages: List[Package]
+
+	def Init( self ) -> None:
+		pass
+
+	def Stop( self ) -> None:
+		pass
 
 	def CreatePackage( self, name: str ) -> None:
 		self.packages.append( Package(name) )
@@ -70,3 +74,6 @@ class PackageManager:
 		:return:
 		"""
 		return f'STYLE_{self.GetName().upper()}_{name.upper()}_BPM'
+
+
+manager: PackageManager = PackageManager()

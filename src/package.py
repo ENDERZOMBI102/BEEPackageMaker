@@ -1,6 +1,4 @@
-from typing import List, Dict, Any
-
-from srctools import Property
+from typing import List
 
 from contentType.item import Item
 from contentType.style import Style

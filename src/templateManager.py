@@ -1,15 +1,23 @@
 import wx
 
+from abstract.manager import AbstractManager
 
-class TemplateManager:
+
+class TemplateManager(AbstractManager):
 
 	window: 'TemplateManagerWindow'
 
-	def __init__(self):
+	def Init( self ) -> None:
 		self.window = TemplateManagerWindow()
+
+	def Stop( self ) -> None:
+		pass
 
 	def ShowManager( self, *args ):
 		self.window.Show()
+
+
+manager: TemplateManager = TemplateManager()
 
 
 class TemplateManagerWindow(wx.Frame):
