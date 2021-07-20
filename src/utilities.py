@@ -193,14 +193,20 @@ def notImplementedYet():
 	).ShowModal()
 
 
+# STUFF FOR parseValue()
+__NONES = [ 'none', 'null', '' ]
+__TRUES = [ 'true', 'yes' ]
+__FALSES = [ 'false', 'no' ]
+
+
 def parseValue( param: str ) -> Union[str, int, float, None, bool]:
-	if ( param == '' ) or ( param in ['none', 'None'] ):
+	if param.lower() in __NONES:
 		return None
 	elif param.isdecimal():
 		return int( param )
-	elif param in 'trueTrueyesYes':
+	elif param.lower() in __TRUES:
 		return True
-	elif param in 'falseFalsenoNo':
+	elif param.lower() in __FALSES:
 		return False
 	for char in param:
 		if char not in '0123456789.':
